@@ -63,7 +63,7 @@ async def main():
                     user_id BIGINT UNIQUE,
                     username VARCHAR(50),
                     company_name VARCHAR(50),
-                    phone VARCHAR(15),
+                    phone VARCHAR(18),
                     sold INTEGER,
                     post VARCHAR(50)
                 )

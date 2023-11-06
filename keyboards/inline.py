@@ -15,3 +15,18 @@ def choice_account() -> InlineKeyboardBuilder:
         )
     )
     return builder
+
+
+def accepting_seller_account_creating() -> InlineKeyboardBuilder:
+    builder = InlineKeyboardBuilder()
+    builder.add(
+        InlineKeyboardButton(
+            text="Всё верно 😎",
+            callback_data="accept_seller_account_creating"
+        ),
+        InlineKeyboardButton(
+            text="Я ошибся 😐",
+            callback_data="refresh_seller_account_creating"
+        )
+    )
+    return builder
