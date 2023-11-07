@@ -3,7 +3,7 @@ from aiogram.filters import Command
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
-from keyboards.inline import *
+from keyboards.inline import choice_account_btns, сompletion_sellers_registration_btns
 from configs.answers import *
 from .states_group import AddSeller, not_in_state_filter, cancel_func
 
@@ -19,7 +19,7 @@ async def cmd_start(message: Message):
     await message.answer(
         "Добро пожаловать на маркетплейс для <b>реконструкторов</b> 💖\
         \n\nДавайте знакомиться! Кто вы?",
-        reply_markup=choice_account().as_markup()
+        reply_markup=choice_account_btns().as_markup()
     )
 
 
@@ -48,7 +48,7 @@ async def i_am_buyer_btn(callback: CallbackQuery):
             )
 
     await callback.message.edit_text(
-        text=f"Добро пожаловать, @{callback.from_user.username}!\n\nВы — покупатель\n\n<i>Хотите заглянуть в магазин? 😊</i>",
+        text=f"Добро пожаловать, @{callback.from_user.username}!\n\nВы — покупатель.\n\n<i>Хотите заглянуть в магазин? 😊</i>",
         reply_markup=None
     )
 
@@ -88,7 +88,7 @@ async def i_am_seller_btn(callback: CallbackQuery, state: FSMContext):
                 await state.set_state(AddSeller.company_name)
             else:
                 await callback.message.edit_text(
-                    text=f"Добро пожаловать, @{username}!\n\nВы — продавец\n\n<i>Не забудьте проверить возможные заказы 😎</i>",
+                    text=f"Добро пожаловать, @{username}!\n\nВы — продавец.\n\n<i>Не забудьте проверить возможные заказы 🤑</i>",
                     reply_markup=None
                 )
 
@@ -142,7 +142,7 @@ async def get_company_name(message: Message, state: FSMContext):
                 \n✅ Название фирмы: <i>{data['name']}</i>\
                 \n✅ Номер телефона: <i>{data['formatted_phone_number']}</i>\
                 \n\n<i>Мы покажем ваш рабочий аккаунт рядом с выставленным товаром.</i>",
-                reply_markup=accepting_seller_account_creating().as_markup()
+                reply_markup=сompletion_sellers_registration_btns().as_markup()
             )
         else:
             await message.answer("❌ <b>Нет-нет-нет!</b>\n\nНомер должен состоять из <b>11 цифр</b>.\n\n<i>Пожалуйста, повторите попытку:</i>")
@@ -178,7 +178,7 @@ async def accept_seller_account_creating_btn(callback: CallbackQuery, state: FSM
 
     await state.clear()
     await callback.message.edit_text(
-        text=f"Добро пожаловать, @{callback.from_user.username}!\n\nВы — продавец\n\n<i>Не затягивайте, выставляйте свои потрясающие товары! 💖</i>",
+        text=f"Добро пожаловать, @{callback.from_user.username}!\n\nВы — продавец.\n\n<i>Не затягивайте, выставляйте свои потрясающие товары! 💖</i>",
         reply_markup=None
     )
     await callback.message.answer(

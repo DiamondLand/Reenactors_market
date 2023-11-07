@@ -5,7 +5,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from loguru import logger
 
-from handlers import register_panel, different_types, states_group
+from handlers import register_panel, different_types, states_group, info_panel
 from postgres_db import create_db_pool
 
 config = configparser.ConfigParser()
@@ -23,6 +23,7 @@ async def main():
     dp.include_routers(
         register_panel.router,
         states_group.router,
+        info_panel.router,
         different_types.router
     )
 

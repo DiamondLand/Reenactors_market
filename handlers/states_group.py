@@ -10,7 +10,7 @@ from configs.answers import no_state_but_button_is
 router = Router()
 
 
-# --- StatesGroup для регистрации продавца и блокирующий фильтр для использования команд во время стадий---
+# --- StatesGroup для регистрации продавца и блокирующий фильтр для использования команд во время стадий ---
 
 
 class AddSeller(StatesGroup):
@@ -20,7 +20,7 @@ class AddSeller(StatesGroup):
 not_in_state_filter = ~StateFilter(AddSeller.company_name, AddSeller.phone)
 
 
-# --- Завершение заполнения формы по кнопке отмены---
+# --- Завершение заполнения формы по кнопке отмены ---
 
 
 async def cancel_func(message: Message, state: FSMContext):
