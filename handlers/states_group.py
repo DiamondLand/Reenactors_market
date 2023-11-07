@@ -17,6 +17,7 @@ class AddSeller(StatesGroup):
     company_name = State()
     phone = State()
 
+    
 not_in_state_filter = ~StateFilter(AddSeller.company_name, AddSeller.phone)
 
 

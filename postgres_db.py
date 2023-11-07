@@ -1,88 +1,79 @@
-import asyncio
-import asyncpg
 import configparser
+from tortoise import Tortoise, fields, run_async
+from tortoise.models import Model
 
 config = configparser.ConfigParser()
 config.read("configs/config.ini")
 
+
+class Buyer(Model):
+    user_id = fields.BigIntField(unique=True)
+    username = fields.CharField(max_length=50)
+    purchased = fields.IntField()
+
+
+class Product(Model):
+    product_id = fields.IntField(pk=True)
+    name = fields.CharField(max_length=50)
+    description = fields.CharField(max_length=100)
+    price = fields.IntField()
+    amount = fields.IntField()
+    category = fields.CharField(max_length=50)
+    subcategory = fields.CharField(max_length=50)
+    subsubcategory = fields.CharField(max_length=50)
+    image_url = fields.CharField(max_length=255)
+    company_name = fields.CharField(max_length=50)
+    moderation = fields.BooleanField()
+    moderation_comment = fields.CharField(max_length=50)
+
+
+class Ordering(Model):
+    order_id = fields.IntField(pk=True)
+    name = fields.CharField(max_length=50)
+    company_name = fields.CharField(max_length=50)
+    price = fields.IntField()
+    username = fields.CharField(max_length=50)
+    order_date = fields.DateField()
+    order_status = fields.BooleanField()
+
+
+class Staff(Model):
+    user_id = fields.BigIntField(unique=True)
+    username = fields.CharField(max_length=50)
+    company_name = fields.CharField(max_length=50)
+    phone = fields.CharField(max_length=18)
+    sold = fields.IntField()
+    post = fields.CharField(max_length=50)
+
+
+class Support(Model):
+    request_id = fields.IntField(pk=True)
+    chat_id = fields.BigIntField()
+    username = fields.CharField(max_length=50)
+    question = fields.TextField()
+    question_date = fields.DateField()
+    answer = fields.TextField()
+    answer_date = fields.DateField()
+
+
 async def main():
-    pool = await create_db_pool()
-    async with pool.acquire() as connection:
-        async with connection.transaction():
-            await connection.execute("DROP TABLE IF EXISTS buyers")
-            await connection.execute("DROP TABLE IF EXISTS products")
-            await connection.execute("DROP TABLE IF EXISTS orders")
-            await connection.execute("DROP TABLE IF EXISTS staff")
+    await Tortoise.init(
+        modules={"models": ["postgres_db"]},
+        db_url=f"postgres://{config['DATABASE']['user']}:{config['DATABASE']['password']}@{config['DATABASE']['host']}:{config['DATABASE']['port']}/{config['DATABASE']['database']}"
+    )
 
-            await connection.execute(
-                """
-                CREATE TABLE buyers (
-                    user_id BIGINT UNIQUE,
-                    username VARCHAR(50),
-                    purchased INTEGER
-                )
-                """
-            )
+    queries = [
+        "DROP TABLE IF EXISTS Buyer;",
+        "DROP TABLE IF EXISTS Product;",
+        "DROP TABLE IF EXISTS Ordering;",
+        "DROP TABLE IF EXISTS Staff;",
+        "DROP TABLE IF EXISTS Support;"
+    ]
+    
+    for query in queries:
+        await Tortoise.get_connection("default").execute_query(query)
 
-            await connection.execute(
-                """
-                CREATE TABLE products (
-                    product_id SERIAL PRIMARY KEY,
-                    name VARCHAR(50),
-                    description VARCHAR(100),
-                    price INTEGER,
-                    amount INTEGER,
-                    category VARCHAR(50),
-                    subcategory VARCHAR(50),
-                    subsubcategory VARCHAR(50),
-                    image_url VARCHAR,
-                    company_name VARCHAR(50),
-                    moderation BOOLEAN,
-                    moderation_comment VARCHAR(50)
-                )
-                """
-            )
-
-            await connection.execute(
-                """
-                CREATE TABLE orders (
-                    order_id SERIAL PRIMARY KEY,
-                    name VARCHAR(50),
-                    company_name VARCHAR(50),
-                    price INTEGER,
-                    username VARCHAR(50),
-                    order_date DATE,
-                    order_status BOOLEAN
-                )
-                """
-            )
-
-            await connection.execute(
-                """
-                CREATE TABLE staff (
-                    user_id BIGINT UNIQUE,
-                    username VARCHAR(50),
-                    company_name VARCHAR(50),
-                    phone VARCHAR(18),
-                    sold INTEGER,
-                    post VARCHAR(50)
-                )
-                """
-            )
-
-async def create_db_pool():
-    try:
-        pool = await asyncpg.create_pool(
-            host=config["DATABASE"]["host"],
-            port=config["DATABASE"]["port"],
-            user=config["DATABASE"]["user"],
-            password=config["DATABASE"]["password"],
-            database=config["DATABASE"]["database"]
-        )
-        return pool
-    except asyncpg.PostgresError as _ex:
-        print("Ошибка при подключении к базе данных: ", _ex)
-        return None
+    await Tortoise.generate_schemas()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    run_async(main())
