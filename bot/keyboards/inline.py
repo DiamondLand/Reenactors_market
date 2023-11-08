@@ -38,6 +38,25 @@ def сompletion_sellers_registration_btns() -> InlineKeyboardBuilder:
     return builder
 
 
+# --- Панель покупателя ---
+
+
+def buyer_panel_btns() -> InlineKeyboardBuilder:
+    builder = InlineKeyboardBuilder()
+    builder.add(
+        InlineKeyboardButton(
+            text="Магазин",
+            callback_data="shop_open"
+        ),
+        InlineKeyboardButton(
+            text="Условия использования",
+            callback_data="terms_of_use"
+        )
+    )
+    builder.adjust(1, 1)
+    return builder
+
+
 # --- Информационная панель ---
 
 
@@ -51,6 +70,10 @@ def info_panel_btns() -> InlineKeyboardBuilder:
         InlineKeyboardButton(
             text="Условия использования",
             callback_data="terms_of_use"
+        ),
+        InlineKeyboardButton(
+            text="Поддержка",
+            callback_data="connect_with_support"
         )
     )
     builder.adjust(1, 1)

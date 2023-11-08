@@ -6,14 +6,14 @@ from aiogram.enums import ParseMode
 from loguru import logger
 
 from handlers import register_panel, different_types, states_group, info_panel
-from postgres_db import create_db_pool
 
 config = configparser.ConfigParser()
-config.read("configs/config.ini")
+config.read("bot/configs/config.ini")
+
 
 async def main():
     bot = Bot(config["SETTINGS"]["token"], parse_mode=ParseMode.HTML)
-    bot.pool = await create_db_pool()
+    bot.config = config
     dp = Dispatcher()
 
 
