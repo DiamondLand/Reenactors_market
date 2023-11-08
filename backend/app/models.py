@@ -1,5 +1,5 @@
 import configparser
-from tortoise import Tortoise, fields, run_async
+from tortoise import fields, run_async
 from tortoise.models import Model
 
 config = configparser.ConfigParser()
@@ -54,26 +54,3 @@ class Support(Model):
     question_date = fields.DateField()
     answer = fields.TextField()
     answer_date = fields.DateField()
-
-
-async def main():
-    await Tortoise.init(
-        modules={"models": ["postgres_db"]},
-        db_url=f"postgres://{config['DATABASE']['user']}:{config['DATABASE']['password']}@{config['DATABASE']['host']}:{config['DATABASE']['port']}/{config['DATABASE']['database']}"
-    )
-
-    queries = [
-        "DROP TABLE IF EXISTS Buyer;",
-        "DROP TABLE IF EXISTS Product;",
-        "DROP TABLE IF EXISTS Ordering;",
-        "DROP TABLE IF EXISTS Staff;",
-        "DROP TABLE IF EXISTS Support;"
-    ]
-    
-    for query in queries:
-        await Tortoise.get_connection("default").execute_query(query)
-
-    await Tortoise.generate_schemas()
-
-if __name__ == "__main__":
-    run_async(main())

@@ -6,8 +6,7 @@ from aiogram.fsm.context import FSMContext
 from keyboards.inline import choice_account_btns, сompletion_sellers_registration_btns
 from configs.answers import *
 from .states_group import AddSeller, not_in_state_filter, cancel_func
-from postgres_db import Buyer, Product, Ordering, Staff, Support
-
+import httpx
 
 router = Router()
 
@@ -38,14 +37,13 @@ async def cancel_handler(message: Message, state: FSMContext):
 @router.callback_query(not_in_state_filter, F.data == "i_am_buyer")
 async def i_am_buyer_btn(callback: CallbackQuery):
     # --- Проверка на существование записи и при отсутствии insert ---
-    if not await Buyer.exists(user_id=callback.from_user.id):
-        new = Buyer(
-            user_id=callback.from_user.id,
-            username=callback.from_user.username,
-            purchased=0
-        )
-        await new.save()
-
+    async with httpx.AsyncClient() as client:
+        await client.post(callback.bot.config["SETTINGS"]["backend_url"] + 'create_buyer', json={
+            "user_id" :callback.from_user.id,
+            'username':callback.from_user.username,
+            'purchased': 0
+        })
+        
     await callback.message.edit_text(
         text=f"Добро пожаловать, @{callback.from_user.username}!\n\nВы — покупатель.\n\n<i>Хотите заглянуть в магазин? 😊</i>",
         reply_markup=None
@@ -57,10 +55,13 @@ async def i_am_buyer_btn(callback: CallbackQuery):
 
 @router.callback_query(not_in_state_filter, F.data == "i_am_seller")
 async def i_am_seller_btn(callback: CallbackQuery, state: FSMContext):
-    username = await Staff.get_or_none(user_id=callback.from_user.id)
-    print(username)
-
-    if username is None:
+    # --- Проверка на существование записи ---
+    async with httpx.AsyncClient() as client:
+        res = await client.post(callback.bot.config["SETTINGS"]["backend_url"] + 'get_staff', json={
+            "user_id" :callback.from_user.id
+        })
+    print(res.json())
+    if res.json() is None:
         await callback.message.edit_text(
             text="Похоже у Вас <b>нет аккаунта продавца</b>, но это не страшно! Мы создадим его прямо сейчас 😎",
             reply_markup=None
@@ -82,7 +83,7 @@ async def i_am_seller_btn(callback: CallbackQuery, state: FSMContext):
         await state.set_state(AddSeller.company_name)
     else:
         await callback.message.edit_text(
-            text=f"Добро пожаловать, @{username}!\n\nВы — продавец.\n\n<i>Не забудьте проверить возможные заказы 🤑</i>",
+            text=f"Добро пожаловать, @{callback.from_user.username}!\n\nВы — продавец.\n\n<i>Не забудьте проверить возможные заказы 🤑</i>",
             reply_markup=None
         )
 
@@ -155,16 +156,16 @@ async def accept_seller_account_creating_btn(callback: CallbackQuery, state: FSM
         return
     
     # --- Проверка на существование записи и при отсутствии insert ---
-    if not await Staff.exists(user_id=callback.from_user.id):
-        new = Staff(
-            user_id=callback.from_user.id,
-            username=callback.from_user.username,
-            company_name=data['name'],
-            phone=data['formatted_phone_number'],
-            sold=0,
-            post="seller"
-        )
-        await new.save()
+    async with httpx.AsyncClient() as client:
+        await client.post(callback.bot.config["SETTINGS"]["backend_url"] + 'create_staff', json={
+            "id" :callback.from_user.id,
+            'username':callback.from_user.username,
+            'company_name': data['name'],
+            'phone_number': data['formatted_phone_number'],
+            'sold':0,
+            'post':"seller"
+        })
+    
 
     await state.clear()
     await callback.message.edit_text(
