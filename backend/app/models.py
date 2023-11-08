@@ -7,21 +7,13 @@ config.read("configs/config.ini")
 
 
 class Buyer(Model):
-<<<<<<< HEAD
     user_id = fields.BigIntField(unique=True, pk=True)
-=======
-    user_id = fields.BigIntField(unique=True)
->>>>>>> 3cd027d45fbe7bbc8de4e9412f46a37672aa01d1
     username = fields.CharField(max_length=50)
     purchased = fields.IntField()
 
 
 class Product(Model):
-<<<<<<< HEAD
     product_id = fields.IntField()
-=======
-    product_id = fields.IntField(pk=True)
->>>>>>> 3cd027d45fbe7bbc8de4e9412f46a37672aa01d1
     name = fields.CharField(max_length=50)
     description = fields.CharField(max_length=100)
     price = fields.IntField()
@@ -46,11 +38,7 @@ class Ordering(Model):
 
 
 class Staff(Model):
-<<<<<<< HEAD
     user_id = fields.BigIntField(unique=True, pk=True)
-=======
-    user_id = fields.BigIntField(unique=True)
->>>>>>> 3cd027d45fbe7bbc8de4e9412f46a37672aa01d1
     username = fields.CharField(max_length=50)
     company_name = fields.CharField(max_length=50)
     phone = fields.CharField(max_length=18)

@@ -39,13 +39,8 @@ async def i_am_buyer_btn(callback: CallbackQuery):
     # --- Проверка на существование записи и при отсутствии insert ---
     async with httpx.AsyncClient() as client:
         await client.post(callback.bot.config["SETTINGS"]["backend_url"] + 'create_buyer', json={
-<<<<<<< HEAD
             "user_id" : callback.from_user.id,
             'username': callback.from_user.username,
-=======
-            "user_id" :callback.from_user.id,
-            'username':callback.from_user.username,
->>>>>>> 3cd027d45fbe7bbc8de4e9412f46a37672aa01d1
             'purchased': 0
         })
         
@@ -62,7 +57,6 @@ async def i_am_buyer_btn(callback: CallbackQuery):
 async def i_am_seller_btn(callback: CallbackQuery, state: FSMContext):
     # --- Проверка на существование записи ---
     async with httpx.AsyncClient() as client:
-<<<<<<< HEAD
         res = await client.get(
             f"{callback.bot.config['SETTINGS']['backend_url']}get_staff?user_id={callback.from_user.id}"
         )
@@ -81,26 +75,6 @@ async def i_am_seller_btn(callback: CallbackQuery, state: FSMContext):
             input_field_placeholder="Прервать заполнение формы"
         )
 
-=======
-        res = await client.post(callback.bot.config["SETTINGS"]["backend_url"] + 'get_staff', json={
-            "user_id" :callback.from_user.id
-        })
-    print(res.json())
-    if res.json() is None:
-        await callback.message.edit_text(
-            text="Похоже у Вас <b>нет аккаунта продавца</b>, но это не страшно! Мы создадим его прямо сейчас 😎",
-            reply_markup=None
-        )
-
-        # --- Обычная кнопка для отмены заполнения формы [cancel] ---
-        kb = [[KeyboardButton(text=cancel_button_kb)]]
-        keyboard = ReplyKeyboardMarkup(
-            keyboard=kb,
-            resize_keyboard=True,
-            input_field_placeholder="Прервать заполнение формы"
-        )
-
->>>>>>> 3cd027d45fbe7bbc8de4e9412f46a37672aa01d1
         await callback.message.answer(
             text="<b>Как называется Ваша фирма?</b>\
             \n\n<i>Введите название в чат:</i>",
@@ -183,7 +157,6 @@ async def accept_seller_account_creating_btn(callback: CallbackQuery, state: FSM
     
     # --- Проверка на существование записи и при отсутствии insert ---
     async with httpx.AsyncClient() as client:
-<<<<<<< HEAD
         response = await client.post(callback.bot.config["SETTINGS"]["backend_url"] + 'create_staff', json={
             "user_id": callback.from_user.id,
             'username': callback.from_user.username,
@@ -193,27 +166,6 @@ async def accept_seller_account_creating_btn(callback: CallbackQuery, state: FSM
             'post': "seller"
         })
 
-=======
-        await client.post(callback.bot.config["SETTINGS"]["backend_url"] + 'create_staff', json={
-            "id" :callback.from_user.id,
-            'username':callback.from_user.username,
-            'company_name': data['name'],
-            'phone_number': data['formatted_phone_number'],
-            'sold':0,
-            'post':"seller"
-        })
-    
-
-    await state.clear()
-    await callback.message.edit_text(
-        text=f"Добро пожаловать, @{callback.from_user.username}!\n\nВы — продавец.\n\n<i>Не затягивайте, выставляйте свои потрясающие товары! 💖</i>",
-        reply_markup=None
-    )
-    await callback.message.answer(
-        text="✅ Ваши даннные успешно сохранены и находятся в полной безопасности!",
-        reply_markup=ReplyKeyboardRemove()
-    )
->>>>>>> 3cd027d45fbe7bbc8de4e9412f46a37672aa01d1
     
         if response.status_code == 200:
             await callback.message.edit_text(
