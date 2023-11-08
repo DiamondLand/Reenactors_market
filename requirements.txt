@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 loguru==0.7.2
 aiogram==3.1.1
 asyncpg==0.29.0
@@ -5,3 +6,6 @@ tortoise_orm==0.20.0
 uvicorn==0.24
 fastapi==0.104.1
 httpx==0.25.1
+=======
+uvicorn==0.24
+>>>>>>> 3cd027d45fbe7bbc8de4e9412f46a37672aa01d1
