@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from .models import Seller, Buyer
-from .schemas import CreateBuyerModel, CreateSellerModel
+from .models import Seller, Buyer, Support
+from .schemas import CreateBuyerModel, CreateSellerModel, CreateQuestionToSupport
 
 controller = APIRouter()
 
@@ -43,18 +43,15 @@ async def create_seller(data: CreateSellerModel):
 # --- Регистрация Buyer ---
 @controller.post('/create_buyer')
 async def create_buyer(data: CreateBuyerModel):
-    new, created = await Buyer.update_or_create(
-        user_id=data.user_id,
-        defaults={
-            'username': data.username,
-            'purchased': data.purchased,
-            'privilege': data.privilege
-        }
-    )
-    if created:
-        return {'user_id': new.user_id}
-    else:
-        pass
+    res = await Buyer.get_or_none(user_id=data.user_id)
+    if not res:
+        created = await Buyer.create(
+            user_id = data.user_id,
+            username = data.username,
+            purchased = data.purchased,
+            privilege = data.privilege
+        )
+        created.save()
 
 
 # --- Проверка привелегий аккаунта --- 
@@ -65,3 +62,37 @@ async def get_privilege(user_id: int):
         return res.privilege
     else:
         return None
+    
+
+# --- Получение сообщений в чате с поддержкой --- 
+@controller.get('/get_messages_on_support')
+async def get_messages_on_support(user_id: int):
+    res = await Support.filter(user_id=user_id).all()
+    if res:
+        return res
+    else:
+        return None
+    
+
+# --- Новый вопрос поддержке ---
+@controller.post('/send_question')
+async def send_question(data: CreateQuestionToSupport):
+    created = await Support.create(
+        user_id = data.user_id,
+        question = data.question,
+        question_date = data.question_date
+    )
+    created.save()
+
+
+# --- Ответ от поддержки ---
+@controller.post('/answer_question')
+async def answer_question(data: CreateQuestionToSupport):
+    created = await Support.filter(user_id = data.user_id).update(
+        answer_user_id  = data.answer_user_id,
+        answer = data.answer_user_id,
+        answer_date = data.answer_user_id
+    )
+    created.save()
+    
+

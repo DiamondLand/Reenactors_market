@@ -48,10 +48,9 @@ class Seller(Model):
 
 class Support(Model):
     request_id = fields.BigIntField(pk=True)
-    chat_id = fields.BigIntField()
     user_id = fields.BigIntField()
     question = fields.TextField()
     question_date = fields.DateField()
-    answer_user_id = fields.BigIntField()
-    answer = fields.TextField()
-    answer_date = fields.DateField()
+    answer_user_id = fields.BigIntField(null=True)
+    answer = fields.TextField(null=True)
+    answer_date = fields.DateField(null=True)

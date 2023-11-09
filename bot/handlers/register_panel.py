@@ -25,8 +25,13 @@ async def cmd_start(message: Message):
 
 # --- Завершение заполнения ---
 @router.message(F.text == cancel_button_kb)
-async def cancel_handler(message: Message, state: FSMContext):
+async def cancel_register_handler(message: Message, state: FSMContext):
     await cancel_func(message=message, state=state)
+    await message.answer(
+        "<b>Заполнение формы прервано!</b>\n\nВведённые данные не были сохранены!",
+        reply_markup=ReplyKeyboardRemove()
+    )
+    await cmd_start(message)
 
 
 # --- Обработчик кнопоки регистрации/авторизации покупателя ---
@@ -227,6 +232,6 @@ async def accept_seller_account_creating_btn(callback: CallbackQuery, state: FSM
 
     else:
         await callback.message.edit_text(
-            text="🔄 <b>У вас уже есть аккаунт продавца!</b>\n\nВы уже можете начинать выставлять товары.\n\n<i>Зайдите в аккаунт, использовав /start</i>",
+            text="🔄 <b>У вас уже есть аккаунт продавца!</b>\n\nВы можете начинать выставлять товары.\n\n<i>Зайдите в аккаунт, использовав /start</i>",
             reply_markup=None
         )

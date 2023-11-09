@@ -133,8 +133,37 @@ def open_chat_with_support_btn() -> InlineKeyboardBuilder:
     builder = InlineKeyboardBuilder()
     builder.add(
         InlineKeyboardButton(
-            text="Мой чат с поддержкой",
+            text="Перейти в чат",
             callback_data="open_chat_with_support"
         )
     )
+    return builder
+
+
+# --- Чат с поддержкой---
+def on_chat_with_support_btn() -> InlineKeyboardBuilder:
+    builder = InlineKeyboardBuilder()
+    builder.add(
+        InlineKeyboardButton(
+            text="Далее",
+            callback_data="next_on_chat_with_support"
+        ),
+        InlineKeyboardButton(
+            text="Назад",
+            callback_data="back_on_chat_with_support"
+        ),
+        InlineKeyboardButton(
+            text="К последней",
+            callback_data="last_on_chat_with_support"
+        ),
+        InlineKeyboardButton(
+            text="К первой",
+            callback_data="first_on_chat_with_support"
+        ),
+        InlineKeyboardButton(
+            text="Написать",
+            callback_data="wrtite_to_support"
+        )
+    )
+    builder.adjust(2, 2)
     return builder

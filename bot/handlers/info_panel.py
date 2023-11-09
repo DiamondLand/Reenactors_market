@@ -11,8 +11,6 @@ router = Router()
     
 
 # --- Информационная панель c обработчиком кнопки возврата---
-
-
 @router.message(not_in_state_filter, Command("info"))
 async def cmd_info(message: Message):
     await message.answer(
@@ -34,8 +32,6 @@ async def info_panel_back_btn(callback: CallbackQuery):
 
 
 # --- Обработчик кнопоки политики конфиденциальности ---
-
-
 @router.callback_query(not_in_state_filter, F.data == "privacy_policy")
 async def privacy_policy_btn(callback: CallbackQuery):
     await callback.message.edit_text(
@@ -45,8 +41,6 @@ async def privacy_policy_btn(callback: CallbackQuery):
 
 
 # --- Обработчик кнопоки условий использования ---
-
-
 @router.callback_query(not_in_state_filter, F.data == "terms_of_use")
 async def terms_of_use_btn(callback: CallbackQuery):
     await callback.message.edit_text(

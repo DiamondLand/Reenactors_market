@@ -10,20 +10,22 @@ from configs.answers import no_state_but_button_is
 router = Router()
 
 
-# --- StatesGroup для регистрации продавца и блокирующий фильтр для использования команд во время стадий ---
-
-
+# --- StatesGroup для регистрации продавца ---
 class AddSeller(StatesGroup):
     company_name = State()
     phone = State()
 
-    
-not_in_state_filter = ~StateFilter(AddSeller.company_name, AddSeller.phone)
+
+# --- StatesGroup для работы с чатом поддержки ---
+class SupportConnect(StatesGroup):
+    support_text = State()
+
+
+# Блокирующий фильтр для использования команд во время стадий
+not_in_state_filter = ~StateFilter(AddSeller.company_name, AddSeller.phone, SupportConnect.support_text)
 
 
 # --- Завершение заполнения формы по кнопке отмены ---
-
-
 async def cancel_func(message: Message, state: FSMContext):
     current_state = await state.get_state()
     if current_state is None:
@@ -34,7 +36,3 @@ async def cancel_func(message: Message, state: FSMContext):
         return
     
     await state.clear()
-    await message.answer(
-        "<b>Заполнение формы прервано!</b>\n\n<i>Пропишите</i> /start <i>для возвращения в главную панель 🔄</i>",
-        reply_markup=ReplyKeyboardRemove()
-    )
