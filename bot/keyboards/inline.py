@@ -3,8 +3,6 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 
 # --- Выбор аккаунта ---
-
-
 def choice_account_btns() -> InlineKeyboardBuilder:
     builder = InlineKeyboardBuilder()
     builder.add(
@@ -20,9 +18,69 @@ def choice_account_btns() -> InlineKeyboardBuilder:
     return builder
 
 
+# --- Кнопка открытия магазина ---
+def shop_open_btn() -> InlineKeyboardBuilder:
+    builder = InlineKeyboardBuilder()
+    builder.add(
+        InlineKeyboardButton(
+            text="В магазин 🛍️",
+            callback_data="shop_open"
+        )
+    )
+    return builder
+
+
+# --- Панель администратора ---
+def admin_panel_btns() -> InlineKeyboardBuilder:
+    builder = InlineKeyboardBuilder()
+    builder.add(
+        InlineKeyboardButton(
+            text="В магазин 🛍️",
+            callback_data="shop_open"
+        ),
+        InlineKeyboardButton(
+            text="Продавцы 💖",
+            callback_data="all_sellers"
+        ),
+        InlineKeyboardButton(
+            text="Ответить на запросы 💌",
+            callback_data="chat_with_support"
+        ),
+        InlineKeyboardButton(
+            text="Товары на модерации ⚙️",
+            callback_data="new_products"
+        ),
+        InlineKeyboardButton(
+            text="Заблокировать аккаунт 💀",
+            callback_data="ban_account"
+        ),
+        InlineKeyboardButton(
+            text="Назначить оператора поддержки 🎉",
+            callback_data="new_support"
+        )
+    )
+    builder.adjust(2, 1)
+    return builder
+
+
+# --- Панель оператора поддержки ---
+def support_panel_btns() -> InlineKeyboardBuilder:
+    builder = InlineKeyboardBuilder()
+    builder.add(
+        InlineKeyboardButton(
+            text="В магазин 🛍️",
+            callback_data="shop_open"
+        ),
+        InlineKeyboardButton(
+            text="Ответить на запросы 💌",
+            callback_data="chat_with_support"
+        )
+    )
+    builder.adjust(1, 1)
+    return builder
+
+
 # --- Завершение регистрации ---
-
-
 def сompletion_sellers_registration_btns() -> InlineKeyboardBuilder:
     builder = InlineKeyboardBuilder()
     builder.add(
@@ -38,28 +96,7 @@ def сompletion_sellers_registration_btns() -> InlineKeyboardBuilder:
     return builder
 
 
-# --- Панель покупателя ---
-
-
-def buyer_panel_btns() -> InlineKeyboardBuilder:
-    builder = InlineKeyboardBuilder()
-    builder.add(
-        InlineKeyboardButton(
-            text="Магазин",
-            callback_data="shop_open"
-        ),
-        InlineKeyboardButton(
-            text="Условия использования",
-            callback_data="terms_of_use"
-        )
-    )
-    builder.adjust(1, 1)
-    return builder
-
-
 # --- Информационная панель ---
-
-
 def info_panel_btns() -> InlineKeyboardBuilder:
     builder = InlineKeyboardBuilder()
     builder.add(
@@ -86,6 +123,18 @@ def back_info_panel_btns() -> InlineKeyboardBuilder:
         InlineKeyboardButton(
             text="Назад",
             callback_data="info_panel_back"
+        )
+    )
+    return builder
+
+
+# --- Панель связи с поддержкой---
+def open_chat_with_support_btn() -> InlineKeyboardBuilder:
+    builder = InlineKeyboardBuilder()
+    builder.add(
+        InlineKeyboardButton(
+            text="Мой чат с поддержкой",
+            callback_data="open_chat_with_support"
         )
     )
     return builder

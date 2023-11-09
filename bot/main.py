@@ -5,7 +5,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from loguru import logger
 
-from handlers import register_panel, different_types, states_group, info_panel
+from handlers import register_panel, different_types, states_group, info_panel, chat_with_support
 
 config = configparser.ConfigParser()
 config.read("bot/configs/config.ini")
@@ -24,6 +24,7 @@ async def main():
         register_panel.router,
         states_group.router,
         info_panel.router,
+        chat_with_support.router,
         different_types.router
     )
 

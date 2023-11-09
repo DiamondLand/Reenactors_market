@@ -7,13 +7,14 @@ config.read("configs/config.ini")
 
 
 class Buyer(Model):
-    user_id = fields.BigIntField(unique=True)
+    user_id = fields.BigIntField(unique=True, pk=True)
     username = fields.CharField(max_length=50)
     purchased = fields.IntField()
+    privilege = fields.CharField(max_length=50, null=True)
 
 
 class Product(Model):
-    product_id = fields.IntField(pk=True)
+    product_id = fields.BigIntField()
     name = fields.CharField(max_length=50)
     description = fields.CharField(max_length=100)
     price = fields.IntField()
@@ -28,7 +29,7 @@ class Product(Model):
 
 
 class Ordering(Model):
-    order_id = fields.IntField(pk=True)
+    order_id = fields.BigIntField(pk=True)
     name = fields.CharField(max_length=50)
     company_name = fields.CharField(max_length=50)
     price = fields.IntField()
@@ -37,20 +38,20 @@ class Ordering(Model):
     order_status = fields.BooleanField()
 
 
-class Staff(Model):
-    user_id = fields.BigIntField(unique=True)
+class Seller(Model):
+    user_id = fields.BigIntField(unique=True, pk=True)
     username = fields.CharField(max_length=50)
     company_name = fields.CharField(max_length=50)
     phone = fields.CharField(max_length=18)
     sold = fields.IntField()
-    post = fields.CharField(max_length=50)
 
 
 class Support(Model):
-    request_id = fields.IntField(pk=True)
+    request_id = fields.BigIntField(pk=True)
     chat_id = fields.BigIntField()
-    username = fields.CharField(max_length=50)
+    user_id = fields.BigIntField()
     question = fields.TextField()
     question_date = fields.DateField()
+    answer_user_id = fields.BigIntField()
     answer = fields.TextField()
     answer_date = fields.DateField()

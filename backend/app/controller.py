@@ -1,64 +1,67 @@
-import pydantic
-
 from fastapi import APIRouter
-from tortoise.exceptions import DoesNotExist
-from .models import Staff, Buyer
-
+from .models import Seller, Buyer
+from .schemas import CreateBuyerModel, CreateSellerModel
 
 controller = APIRouter()
 
 
-# --- Проверка наличия аккаунта Staff ---
-@controller.post('/get_staff')
-async def get_staff(user_id: int):
-    data = await Staff.get_or_none(user_id=user_id)
-    if data:
-        return data
+# --- Проверка наличия аккаунта Seller --- 
+@controller.get('/get_seller')
+async def get_seller(user_id: int):
+    res = await Seller.get_or_none(user_id=user_id)
+    if res:
+        return res
     else:
         return None
+    
 
+# --- Проверка привелегий аккаунта --- 
+@controller.get('/get_privilege')
+async def get_privilege(user_id: int):
+    res = await Buyer.get_or_none(user_id=user_id)
+    if res and res.privilege:
+        return res.privilege
+    else:
+        return None
+    
 
-# --- Регистрация Staff ---
-class CreateStaffModel(pydantic.BaseModel):
-    user_id: int
-    username: str
-    company_name: str
-    phone_number: str
-    sold: int = 0
-    post: str = 'seller'
-
-
-@controller.post('/create_staff')
-async def get_user(data: CreateStaffModel):
-    new = Staff(
+# --- Регистрация Seller ---
+@controller.post('/create_seller')
+async def create_seller(data: CreateSellerModel):
+    new, _ = await Seller.update_or_create(
         user_id=data.user_id,
-        username=data.username,
-        company_name=data.company_name,
-        phone=data.phone_number,
-        sold=data.sold,
-        post=data.post
+        defaults={
+            'username': data.username,
+            'company_name': data.company_name,
+            'phone': data.phone_number,
+            'sold': data.sold
+        }
     )
-    await new.save()
-    return {'id': new.user_id}
+    return {'user_id': new.user_id}
 
 
 # --- Регистрация Buyer ---
-class CreateBuyerModel(pydantic.BaseModel):
-    user_id: int
-    username: str
-    purchased: int = 0
-
-
 @controller.post('/create_buyer')
-async def get_user(data: CreateBuyerModel):
+async def create_buyer(data: CreateBuyerModel):
     new, created = await Buyer.update_or_create(
         user_id=data.user_id,
         defaults={
             'username': data.username,
             'purchased': data.purchased,
+            'privilege': data.privilege
         }
     )
     if created:
-        return {'id': new.user_id}
+        return {'user_id': new.user_id}
     else:
         pass
+
+
+# --- Проверка привелегий аккаунта --- 
+@controller.get('/get_privilege')
+async def get_privilege(user_id: int):
+    res = await Buyer.get_or_none(user_id=user_id)
+    if res and res.privilege:
+        return res.privilege
+    else:
+        return None

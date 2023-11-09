@@ -3,6 +3,7 @@ import uvicorn
 from app import app
 from db import init
 
+
 init(app)
 
 
