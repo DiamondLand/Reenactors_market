@@ -14,7 +14,11 @@ class Buyer(Model):
 
 
 class Product(Model):
+<<<<<<< HEAD
     product_id = fields.BigIntField()
+=======
+    product_id = fields.IntField()
+>>>>>>> 4c3fdcfd7ca61bb01d81015cd559d46bfbba71d9
     name = fields.CharField(max_length=50)
     description = fields.CharField(max_length=100)
     price = fields.IntField()
@@ -38,7 +42,11 @@ class Ordering(Model):
     order_status = fields.BooleanField()
 
 
+<<<<<<< HEAD
 class Seller(Model):
+=======
+class Staff(Model):
+>>>>>>> 4c3fdcfd7ca61bb01d81015cd559d46bfbba71d9
     user_id = fields.BigIntField(unique=True, pk=True)
     username = fields.CharField(max_length=50)
     company_name = fields.CharField(max_length=50)

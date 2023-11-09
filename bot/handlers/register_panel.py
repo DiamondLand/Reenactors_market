@@ -36,7 +36,12 @@ async def i_am_buyer_btn(callback: CallbackQuery):
     async with httpx.AsyncClient() as client:
         await client.post(callback.bot.config["SETTINGS"]["backend_url"] + 'create_buyer', json={
             "user_id" : callback.from_user.id,
+<<<<<<< HEAD
             'username': callback.from_user.username
+=======
+            'username': callback.from_user.username,
+            'purchased': 0
+>>>>>>> 4c3fdcfd7ca61bb01d81015cd559d46bfbba71d9
         })
         # --- Проверка привелегии ---
         privilege_res = await client.get(
@@ -74,7 +79,11 @@ async def i_am_seller_btn(callback: CallbackQuery, state: FSMContext):
     # --- Проверка на существование записи ---
     async with httpx.AsyncClient() as client:
         res = await client.get(
+<<<<<<< HEAD
             f"{callback.bot.config['SETTINGS']['backend_url']}get_seller?user_id={callback.from_user.id}"
+=======
+            f"{callback.bot.config['SETTINGS']['backend_url']}get_staff?user_id={callback.from_user.id}"
+>>>>>>> 4c3fdcfd7ca61bb01d81015cd559d46bfbba71d9
         )
 
     if res.json() is None:
@@ -167,12 +176,21 @@ async def accept_seller_account_creating_btn(callback: CallbackQuery, state: FSM
     
     # --- Проверка на существование записи и при отсутствии insert ---
     async with httpx.AsyncClient() as client:
+<<<<<<< HEAD
         response = await client.post(callback.bot.config["SETTINGS"]["backend_url"] + 'create_seller', json={
+=======
+        response = await client.post(callback.bot.config["SETTINGS"]["backend_url"] + 'create_staff', json={
+>>>>>>> 4c3fdcfd7ca61bb01d81015cd559d46bfbba71d9
             "user_id": callback.from_user.id,
             'username': callback.from_user.username,
             'company_name': data['name'],
             'phone_number': data['formatted_phone_number'],
+<<<<<<< HEAD
             'sold': 0
+=======
+            'sold': 0,
+            'post': "seller"
+>>>>>>> 4c3fdcfd7ca61bb01d81015cd559d46bfbba71d9
         })
 
     
@@ -203,7 +221,11 @@ async def accept_seller_account_creating_btn(callback: CallbackQuery, state: FSM
     # --- Проверка на существование записи ---
     async with httpx.AsyncClient() as client:
         res = await client.get(
+<<<<<<< HEAD
             f"{callback.bot.config['SETTINGS']['backend_url']}get_seller?user_id={callback.from_user.id}"
+=======
+            f"{callback.bot.config['SETTINGS']['backend_url']}get_staff?user_id={callback.from_user.id}"
+>>>>>>> 4c3fdcfd7ca61bb01d81015cd559d46bfbba71d9
         )
 
     if res.json() is None:
