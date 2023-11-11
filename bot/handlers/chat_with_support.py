@@ -26,7 +26,7 @@ async def display_question(res, msg: Message = None, callback: CallbackQuery = N
     all_text = f"📤 <b>Ваш вопрос:</b>\
         \n<i>{res['question']}</i>\
         \n\n⌚ <b>Вы обратились </b>\n<i>{datetime.fromisoformat(res['question_date']).strftime('%m-%d-%Y %H:%M:%S по МСК')}</i>\
-        \n\n\n{answer_text if res['answer'] is not None else 'Ответ ещё не получен, но мы показываем Ваш вопрос всем агентам поддержки! 😎'}"
+        \nn{answer_text if res['answer'] is not None else 'Ответ ещё не получен, но мы показываем Ваш вопрос всем агентам поддержки! 😎'}"
     
     if msg:
         await msg.answer(
@@ -176,7 +176,7 @@ async def chat_with_support_btn(callback: CallbackQuery):
                         await display_question_for_support(res=messages[0], callback=callback)
                     else:
                         await callback.message.edit_text(
-                            text="Новых запрсов не поступало! Отдыхаем 🤩", 
+                            text="Новых запросов не поступало! Отдыхаем 🤩", 
                             reply_markup=None
                         )
                 else:
@@ -262,7 +262,7 @@ async def write_to_support_text(message: Message, state: FSMContext):
         del user_question_indices[message.from_user.id]
         if response.status_code == 200:
             await message.answer(
-                text=f"✅ <b>Вопрос записан!</b>\n\n<i>{message.text[:1500]}?</i>\n\n<i>Ответ появится в панеле запросов /support 💕</i>",
+                text=f"✅ <b>Вопрос записан!</b>\n\n<i>{message.text[:1500]}</i>\n\n<i>Ответ появится в панеле запросов /support 💕</i>",
                 reply_markup=ReplyKeyboardRemove()
             )
         else:
@@ -310,12 +310,17 @@ async def wrtite_to_buyer_support_text(message: Message, state: FSMContext):
                 })
 
         await state.clear()
-        del messages_response[message.from_user.id]
-        del user_question_indices[message.from_user.id]
         if response.status_code == 200:
             await message.answer(
-                text=f"✅ <b>Ответ записан!</b>\n\n<i>{message.text[:1500]}?</i>\n\n<i>Для быстрого возвращения в панель используйте /support</i>",
+                text=f"✅ <b>Ответ записан!</b>\n\n<i>{message.text[:1500]}</i>\n\n<i>Для быстрого возвращения в панель используйте /support</i>",
                 reply_markup=ReplyKeyboardRemove()
+            )
+            await message.bot.send_message(
+                chat_id=int(messages['user_id']),
+                text="💌 <b>Вам пришёл ответ от поддержки!</b>\
+                \n\nИспользуйте /support для просмотра сообщения."
             )
         else:
             await message.answer(text=response_server_error, reply_markup=ReplyKeyboardRemove())
+        del messages_response[message.from_user.id]
+        del user_question_indices[message.from_user.id]
