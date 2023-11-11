@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from datetime import datetime
 from .models import Seller, Buyer, Support
 from .schemas import CreateBuyerModel, CreateSellerModel, CreateQuestionToSupport, CreateAnswerQuestionToSupport
 
@@ -74,12 +75,12 @@ async def get_messages_on_support(user_id: int):
     
 
 # --- Новый вопрос поддержке ---
-@controller.post('/to_send_question')
+@controller.post('/send_question')
 async def send_question(data: CreateQuestionToSupport):
     await Support.create(
         user_id = data.user_id,
         question = data.question,
-        question_date = data.question_date
+        question_date = datetime.now()
     )
 
 
@@ -89,6 +90,6 @@ async def answer_question(old_data: CreateQuestionToSupport, data: CreateAnswerQ
     await Support.filter(user_id = old_data.user_id).update(
         answer_username = data.answer_username,
         answer = data.answer,
-        answer_date = data.answer_date
+        answer_date = datetime.now()
     )
 

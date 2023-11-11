@@ -1,6 +1,6 @@
 import httpx
 
-from datetime import date
+from datetime import datetime
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, CallbackQuery
@@ -44,15 +44,18 @@ async def cmd_support(message: Message):
                 if response.status_code == 200:
                     messages = response.json()
                     if messages and len(messages) > 0:
-                        first_message = messages[0] 
+                        first_message = messages[0]
 
+                        if first_message['answer']:
+                            answer_text = f"📥 <b>Ответил: {first_message['answer_username']}</b>\
+                                \n<i>{first_message['answer']}</i>\
+                                \n\n⌚ <b>Ответ получен в:</b>\n<i>{datetime.fromisoformat(first_message['answer_date']).strftime('%m-%d-%Y %H:%M:%S по МСК')}</i>"
+                        
                         await message.answer(
                             f"📤 <b>Ваш крайний вопрос:</b>\
                             \n<i>{first_message['question']}</i>\
-                            \n<b>Дата обращения (МСК):</b> <i>{first_message['question_date']}</i>\
-                            \n\n📥 <b>Ответил: @{first_message['answer_username']}</b>\
-                            \n<i>{first_message['answer'] if first_message['answer'] else '—'}</i>\
-                            \n<b>Дата ответа (МСК):</b> <i>{first_message['answer_date'] if first_message['answer_date'] else '—'}</i>",
+                            \n\n⌚ <b>Вы обратились в :</b>\n<i>{datetime.fromisoformat(first_message['question_date']).strftime('%m-%d-%Y %H:%M:%S по МСК')}</i>\
+                            \n\n\n{answer_text if first_message['answer'] is not None else 'Ответ ещё не получен...'}",
                             reply_markup=on_chat_with_support_btn().as_markup()
                         )
                     else:
@@ -71,11 +74,18 @@ async def cmd_support(message: Message):
 async def cancel_connect_with_support_handler(message: Message, state: FSMContext):
     await cancel_func(message=message, state=state)
     await message.answer(
-        "✅ Чат с оператором поддержки был сохранён!",
+        "<b>Заполнение вопроса прервано!</b>\n\nВведённые данные не были сохранены!",
         reply_markup=ReplyKeyboardRemove()
     )
     await cmd_support(message)
     
+
+# --- Обработчик кнопоки ДАЛЕЕ ---
+@router.callback_query(not_in_state_filter, F.data == "next_on_chat_with_support")
+async def next_question_to_support_btn(callback: CallbackQuery):
+    ...
+
+
 
 # --- Обработчик кнопоки написания сообщения с поддержкой ---
 @router.callback_query(not_in_state_filter, F.data == "wrtite_to_support")
@@ -88,10 +98,13 @@ async def wrtite_to_support_btn(callback: CallbackQuery, state: FSMContext):
         resize_keyboard=True,
         input_field_placeholder="Прервать заполнение формы"
     )
-    await callback.message.answer(
+    await callback.message.edit_text(
         text="💌 <b>Так-так. Записываем!</b>\
-        \n\nОпишите проблему. Чем лучше будет сформулирован вопрос, тем больше вероятность решения проблемы!\
-        \n\n<i>Помните, что лимит символов — 1.500. Текст больше будет обрезан!</i>",
+        \n\nОпишите проблему. Чем лучше будет сформулирован вопрос, тем больше вероятность решения проблемы!",
+        reply_markup=None
+    )
+    await callback.message.answer(
+        text="<i>Помните, лимит символов — 1.500. Текст больше будет обрезан!</i>",
         reply_markup=keyboard
     )
 
@@ -104,16 +117,15 @@ async def write_to_support_text(message: Message, state: FSMContext):
     else:
         async with httpx.AsyncClient() as client:            
             response = await client.post(
-                f"{message.bot.config['SETTINGS']['backend_url']}to_send_question", json={
+                f"{message.bot.config['SETTINGS']['backend_url']}send_question", json={
                     'user_id': message.from_user.id,
-                    'question': message.text[:1500],
-                    'question_data': str(date.today())
+                    'question': message.text[:1500]
                 })
 
         await state.clear()
-        if response.status_code == 422:
+        if response.status_code == 200:
             await message.answer(
-                text=f"✅ Ваш вопрос: <i>{message.text[:1500]}?</i> был записан!\n\n<i>Ответ появится в панеле запросов.</i>",
+                text=f"✅ <b>Вопрос записан!</b>\n\n<i>{message.text[:1500]}?</i>\n\n<i>Ответ появится в панеле запросов /support 💕</i>",
                 reply_markup=ReplyKeyboardRemove()
             )
         else:

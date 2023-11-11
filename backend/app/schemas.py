@@ -20,10 +20,8 @@ class CreateBuyerModel(pydantic.BaseModel):
 class CreateQuestionToSupport(pydantic.BaseModel):
     user_id: int
     question: str
-    question_date: str
 
 
 class CreateAnswerQuestionToSupport(pydantic.BaseModel):
     answer_username: Optional[str]
     answer: Optional[str]
-    answer_date: Optional[str]
