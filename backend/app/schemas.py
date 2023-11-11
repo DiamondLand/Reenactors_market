@@ -1,5 +1,6 @@
 import pydantic
 
+from typing import Optional
 
 class CreateSellerModel(pydantic.BaseModel):
     user_id: int
@@ -20,6 +21,9 @@ class CreateQuestionToSupport(pydantic.BaseModel):
     user_id: int
     question: str
     question_date: str
-    answer_user_id: int = None
-    answer: str = None
-    answer_date: str = None
+
+
+class CreateAnswerQuestionToSupport(pydantic.BaseModel):
+    answer_username: Optional[str]
+    answer: Optional[str]
+    answer_date: Optional[str]

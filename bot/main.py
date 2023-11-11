@@ -18,7 +18,6 @@ async def main():
 
 
     # --- Подключение модулей ---
-
     logger.info("Loading modules...")
     dp.include_routers(
         register_panel.router,

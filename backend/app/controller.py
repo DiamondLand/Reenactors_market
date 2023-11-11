@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from .models import Seller, Buyer, Support
-from .schemas import CreateBuyerModel, CreateSellerModel, CreateQuestionToSupport
+from .schemas import CreateBuyerModel, CreateSellerModel, CreateQuestionToSupport, CreateAnswerQuestionToSupport
 
 controller = APIRouter()
 
@@ -45,13 +45,12 @@ async def create_seller(data: CreateSellerModel):
 async def create_buyer(data: CreateBuyerModel):
     res = await Buyer.get_or_none(user_id=data.user_id)
     if not res:
-        created = await Buyer.create(
+        await Buyer.create(
             user_id = data.user_id,
             username = data.username,
             purchased = data.purchased,
             privilege = data.privilege
         )
-        created.save()
 
 
 # --- Проверка привелегий аккаунта --- 
@@ -64,10 +63,10 @@ async def get_privilege(user_id: int):
         return None
     
 
-# --- Получение сообщений в чате с поддержкой --- 
+# --- Получение сообщений в поддержки --- 
 @controller.get('/get_messages_on_support')
 async def get_messages_on_support(user_id: int):
-    res = await Support.filter(user_id=user_id).all()
+    res = await Support.filter(user_id=user_id).order_by('-question_date').all()
     if res:
         return res
     else:
@@ -75,24 +74,21 @@ async def get_messages_on_support(user_id: int):
     
 
 # --- Новый вопрос поддержке ---
-@controller.post('/send_question')
+@controller.post('/to_send_question')
 async def send_question(data: CreateQuestionToSupport):
-    created = await Support.create(
+    await Support.create(
         user_id = data.user_id,
         question = data.question,
         question_date = data.question_date
     )
-    created.save()
 
 
-# --- Ответ от поддержки ---
+# --- Запись ответа от поддержки ---
 @controller.post('/answer_question')
-async def answer_question(data: CreateQuestionToSupport):
-    created = await Support.filter(user_id = data.user_id).update(
-        answer_user_id  = data.answer_user_id,
-        answer = data.answer_user_id,
-        answer_date = data.answer_user_id
+async def answer_question(old_data: CreateQuestionToSupport, data: CreateAnswerQuestionToSupport):
+    await Support.filter(user_id = old_data.user_id).update(
+        answer_username = data.answer_username,
+        answer = data.answer,
+        answer_date = data.answer_date
     )
-    created.save()
-    
 

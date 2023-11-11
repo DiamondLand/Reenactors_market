@@ -5,6 +5,7 @@ from aiogram.types import Message, CallbackQuery
 from keyboards.inline import info_panel_btns, back_info_panel_btns
 from configs.answers import *
 from .states_group import not_in_state_filter
+from .chat_with_support import cmd_support
 
 
 router = Router()

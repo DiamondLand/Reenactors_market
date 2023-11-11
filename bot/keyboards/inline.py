@@ -107,10 +107,6 @@ def info_panel_btns() -> InlineKeyboardBuilder:
         InlineKeyboardButton(
             text="Условия использования",
             callback_data="terms_of_use"
-        ),
-        InlineKeyboardButton(
-            text="Поддержка",
-            callback_data="connect_with_support"
         )
     )
     builder.adjust(1, 1)
@@ -123,18 +119,6 @@ def back_info_panel_btns() -> InlineKeyboardBuilder:
         InlineKeyboardButton(
             text="Назад",
             callback_data="info_panel_back"
-        )
-    )
-    return builder
-
-
-# --- Панель связи с поддержкой---
-def open_chat_with_support_btn() -> InlineKeyboardBuilder:
-    builder = InlineKeyboardBuilder()
-    builder.add(
-        InlineKeyboardButton(
-            text="Перейти в чат",
-            callback_data="open_chat_with_support"
         )
     )
     return builder
