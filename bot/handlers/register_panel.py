@@ -7,7 +7,7 @@ from aiogram.fsm.context import FSMContext
 
 from keyboards.inline import choice_account_btns, сompletion_sellers_registration_btns, admin_panel_btns, support_panel_btns, shop_open_btn
 from configs.answers import *
-from .states_group import AddSeller, not_in_state_filter, cancel_func
+from configs.states_group import AddSeller, not_in_state_filter, cancel_func
 
 
 router = Router()

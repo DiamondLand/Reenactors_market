@@ -143,3 +143,24 @@ def on_chat_with_support_btn() -> InlineKeyboardBuilder:
     )
     builder.adjust(2, 2)
     return builder
+
+
+# --- Чат с поддержкой для работников---
+def on_chat_with_support_buyer_btn() -> InlineKeyboardBuilder:
+    builder = InlineKeyboardBuilder()
+    builder.add(
+        InlineKeyboardButton(
+            text="Назад",
+            callback_data="back_on_chat_with_support_buyer"
+        ),
+        InlineKeyboardButton(
+            text="Далее",
+            callback_data="next_on_chat_with_support_buyer"
+        ),
+        InlineKeyboardButton(
+            text="Ответить",
+            callback_data="wrtite_to_buyer_support"
+        )
+    )
+    builder.adjust(2, 2)
+    return builder

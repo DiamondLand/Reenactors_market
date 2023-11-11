@@ -16,12 +16,13 @@ class CreateBuyerModel(pydantic.BaseModel):
     purchased: int = 0
     privilege: str = None
 
-
 class CreateQuestionToSupport(pydantic.BaseModel):
     user_id: int
     question: str
 
 
 class CreateAnswerQuestionToSupport(pydantic.BaseModel):
+    user_id: int
+    question: Optional[str]
     answer_username: Optional[str]
     answer: Optional[str]

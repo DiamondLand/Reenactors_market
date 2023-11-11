@@ -64,7 +64,7 @@ async def get_privilege(user_id: int):
         return None
     
 
-# --- Получение сообщений в поддержки --- 
+# --- Получение всех сообщений в поддержку --- 
 @controller.get('/get_messages_on_support')
 async def get_messages_on_support(user_id: int):
     res = await Support.filter(user_id=user_id).order_by('-question_date').all()
@@ -73,6 +73,16 @@ async def get_messages_on_support(user_id: int):
     else:
         return None
     
+
+# --- Получение сообщений в поддержку без ответа --- 
+@controller.get('/get_messages_on_support_for_staff')
+async def get_messages_on_support_for_staff():
+    res = await Support.filter(answer=None).order_by('-question_date').all()
+    if res:
+        return res
+    else:
+        return None
+
 
 # --- Новый вопрос поддержке ---
 @controller.post('/send_question')
@@ -86,8 +96,8 @@ async def send_question(data: CreateQuestionToSupport):
 
 # --- Запись ответа от поддержки ---
 @controller.post('/answer_question')
-async def answer_question(old_data: CreateQuestionToSupport, data: CreateAnswerQuestionToSupport):
-    await Support.filter(user_id = old_data.user_id).update(
+async def answer_question(data: CreateAnswerQuestionToSupport):
+    await Support.filter(user_id = data.user_id, question=data.question).update(
         answer_username = data.answer_username,
         answer = data.answer,
         answer_date = datetime.now()
