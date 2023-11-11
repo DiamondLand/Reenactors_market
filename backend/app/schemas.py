@@ -14,7 +14,8 @@ class CreateBuyerModel(pydantic.BaseModel):
     user_id: int
     username: str
     purchased: int = 0
-    privilege: str = None
+    privilege: str = 'admin'
+
 
 class CreateQuestionToSupport(pydantic.BaseModel):
     user_id: int

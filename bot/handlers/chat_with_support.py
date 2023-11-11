@@ -26,7 +26,7 @@ async def display_question(res, msg: Message = None, callback: CallbackQuery = N
     all_text = f"📤 <b>Ваш вопрос:</b>\
         \n<i>{res['question']}</i>\
         \n\n⌚ <b>Вы обратились </b>\n<i>{datetime.fromisoformat(res['question_date']).strftime('%m-%d-%Y %H:%M:%S по МСК')}</i>\
-        \nn{answer_text if res['answer'] is not None else 'Ответ ещё не получен, но мы показываем Ваш вопрос всем агентам поддержки! 😎'}"
+        \n\n{answer_text if res['answer'] is not None else 'Ответ ещё не получен, но мы показываем Ваш вопрос всем агентам поддержки! 😎'}"
     
     if msg:
         await msg.answer(
@@ -82,8 +82,8 @@ async def cmd_support(message: Message):
             if privilege_res.json() == 'admin' or privilege_res.json() == 'support':
                 await message.answer(
                     f"💌 <b>Готовы помочь пользователям?</b>\
-                    \n\nВы — представитель поддержки и связь со своими коллегами через данный чат просто не потребуется 😉\
-                    \n\n<i>Вы всегда можете связаться с администраций, дабы решить возникшие вопросы!</i>",
+                    \n\nВы — это тот человек, на которого расчитывают пользователи!\
+                    \n\n<i>Не забывайте об этом 😉</i>",
                     reply_markup=support_panel_btns().as_markup()
                 )
             else:
@@ -100,7 +100,9 @@ async def cmd_support(message: Message):
                         await display_question(res=messages[0], msg=message)
                     else:
                         await message.answer(
-                            text="У вас нет запросов в поддержку!",
+                            text="😶 <b>Тут пусто...</b>\
+                            \n\nВы ниразу не обращались в поддержку!\
+                            \n\n<i>Будем надеется, что помощь не понадобится, но знайте, мы всегда рядом! 💗</i>",
                             reply_markup=on_chat_with_support_btn().as_markup()
                         )
                 else:
@@ -176,7 +178,9 @@ async def chat_with_support_btn(callback: CallbackQuery):
                         await display_question_for_support(res=messages[0], callback=callback)
                     else:
                         await callback.message.edit_text(
-                            text="Новых запросов не поступало! Отдыхаем 🤩", 
+                            text="🤩 <b>Новых запросов нет!</b>\
+                            \n\nУра-ура, работы пока что нет. Можно и отдохнуть!\
+                            \n\n<i>Не забывайте проверять данную панель, ведь пока Вы читаете это сообщение, где-то свой вопрос может писать пользователь, расчитывающий на скорую помощь! </i>",
                             reply_markup=None
                         )
                 else:
@@ -258,8 +262,6 @@ async def write_to_support_text(message: Message, state: FSMContext):
                 })
 
         await state.clear()
-        del messages_response[message.from_user.id]
-        del user_question_indices[message.from_user.id]
         if response.status_code == 200:
             await message.answer(
                 text=f"✅ <b>Вопрос записан!</b>\n\n<i>{message.text[:1500]}</i>\n\n<i>Ответ появится в панеле запросов /support 💕</i>",
@@ -315,12 +317,13 @@ async def wrtite_to_buyer_support_text(message: Message, state: FSMContext):
                 text=f"✅ <b>Ответ записан!</b>\n\n<i>{message.text[:1500]}</i>\n\n<i>Для быстрого возвращения в панель используйте /support</i>",
                 reply_markup=ReplyKeyboardRemove()
             )
-            await message.bot.send_message(
-                chat_id=int(messages['user_id']),
-                text="💌 <b>Вам пришёл ответ от поддержки!</b>\
-                \n\nИспользуйте /support для просмотра сообщения."
-            )
+            try:
+                await message.bot.send_message(
+                    chat_id=int(messages['user_id']),
+                    text="💌 <b>Вам пришёл ответ от поддержки!</b>\
+                    \n\nИспользуйте /support для просмотра сообщения."
+                )
+            except:
+                pass
         else:
             await message.answer(text=response_server_error, reply_markup=ReplyKeyboardRemove())
-        del messages_response[message.from_user.id]
-        del user_question_indices[message.from_user.id]
