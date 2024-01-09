@@ -5,7 +5,7 @@ from aiogram.filters import Command
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
-from keyboards.inline import choice_account_btns, сompletion_sellers_registration_btns, admin_panel_btns, support_panel_btns, shop_open_btn
+from keyboards.inline import choice_account_btns, сompletion_sellers_registration_btns, admin_panel_btns, support_panel_btns, shop_open_btn, seller_panel_btns
 from configs.answers import *
 from configs.states_group import AddSeller, not_in_state_filter, cancel_func
 
@@ -109,7 +109,7 @@ async def i_am_seller_btn(callback: CallbackQuery, state: FSMContext):
         else:
             await callback.message.edit_text(
                 text=f"Добро пожаловать, @{callback.from_user.username}!\n\nВы — продавец.\n\n",
-                reply_markup=None
+                reply_markup=seller_panel_btns().as_markup()
             )
     else:
         await callback.answer(text=response_server_error)
@@ -164,8 +164,8 @@ async def get_company_name(message: Message, state: FSMContext):
         text = (
             f"<b>Подытожим:</b>"
             f"\n\n✅ Ваш рабочий аккаунт: @{message.from_user.username}"
-            f"\n✅ Название фирмы: <i>{data['company_name']}</i>"
-            f"\n✅ Резервный способ связи: <i>{data['contact']}</i>"
+            f"\n✅ Название фирмы: <i>{data.get('company_name', '')}</i>"
+            f"\n✅ Резервный способ связи: <i>{data.get('contact', '')}</i>"
             f"\n\n<i>Мы покажем данную информацию рядом с выставленным товаром.</i>"
         )
 
@@ -186,14 +186,14 @@ async def accept_seller_account_creating_btn(callback: CallbackQuery, state: FSM
     async with httpx.AsyncClient() as client:
         response = await client.post(callback.bot.config["SETTINGS"]["backend_url"] + 'create_seller', json={
             'user_id': callback.from_user.id,
-            'company_name': data['company_name'],
-            'contact': data['contact'],
+            'company_name': data.get('company_name', ''),
+            'contact': data.get('contact', ''),
         })
         
         if response.status_code == 200:
             await callback.message.edit_text(
                 text=f"Добро пожаловать, @{callback.from_user.username}!\n\nВы — продавец.\n\n<i>Не затягивайте, выставляйте свои потрясающие товары! 💖</i>",
-                reply_markup=None
+                reply_markup=seller_panel_btns().as_markup()
             )
             await callback.message.answer(
                 text="✅ Ваши даннные успешно сохранены и находятся в полной безопасности!",
@@ -241,8 +241,8 @@ async def accept_seller_account_creating_btn(callback: CallbackQuery, state: FSM
             await state.set_state(AddSeller.company_name)
         else:
             await callback.message.edit_text(
-            text="🔄 <b>У вас уже есть аккаунт продавца!</b>\n\nВы можете начинать выставлять товары.\n\n<i>Зайдите в аккаунт, использовав /start</i>",
-            reply_markup=None
+            text="🔄 <b>У вас уже есть аккаунт продавца!</b>\n\nВы можете начинать выставлять товары.",
+            reply_markup=seller_panel_btns().as_markup()
         )
     else:
         await callback.answer(text=response_server_error)

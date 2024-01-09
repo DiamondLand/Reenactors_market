@@ -19,8 +19,33 @@ class SupportConnect(StatesGroup):
     to_buyer_text = State()
 
 
-# Блокирующий фильтр для использования команд во время стадий
-not_in_state_filter = ~StateFilter(AddSeller.company_name, AddSeller.contact, SupportConnect.to_support_text)
+# --- StatesGroup для добавления товара ---
+class AddProduct(StatesGroup):
+    name = State()
+    description = State()
+    price = State()
+    amount = State()
+    category = State()
+    subcategory = State()
+    subsubcategory = State()
+    image_url = State()
+
+
+# --- Блокирующий фильтр для использования команд во время стадий ---
+not_in_state_filter = ~StateFilter(
+    AddSeller.company_name, 
+    AddSeller.contact, 
+    SupportConnect.to_support_text,
+    SupportConnect.to_buyer_text,
+    AddProduct.name,
+    AddProduct.description,
+    AddProduct.price,
+    AddProduct.amount,
+    AddProduct.category,
+    AddProduct.subcategory,
+    AddProduct.subsubcategory,
+    AddProduct.image_url
+)
 
 
 # --- Завершение заполнения формы по кнопке отмены ---

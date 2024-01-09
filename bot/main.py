@@ -5,7 +5,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from loguru import logger
 
-from handlers import register_panel, different_types, info_panel, chat_with_support
+from handlers import register_panel, different_types, info_panel, chat_with_support, add_product
 
 config = configparser.ConfigParser()
 config.read("bot/configs/config.ini")
@@ -21,6 +21,7 @@ async def main():
     logger.info("Loading modules...")
     dp.include_routers(
         register_panel.router,
+        add_product.router,
         info_panel.router,
         chat_with_support.router,
         different_types.router

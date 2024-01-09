@@ -86,7 +86,7 @@ async def get_product_description(message: Message, state: FSMContext):
 
         await state.update_data(data)
         await message.answer(
-            text=f"Сколько стоит <b>{data.get('product_name', '')}</b>?\
+            text=f"Сколько стоит <b>{data.get('product_name', '').lower()}</b>?\
             \n\n<i>Нам потребуется только число, как цена в Российских рублях!</i>"
         )
         await state.set_state(AddProduct.price)
@@ -187,9 +187,7 @@ async def get_product_subsubcategory(message: Message, state: FSMContext):
         
             await state.update_data(data)
             await message.answer(
-                text=f"<b>Потребуется url фотографии товара по типу:</b>\
-                \n\nhttps://vk.cc/csq56E\
-                \n\n<i>*Пользоваться сервисами сокращения ссылок необязательно</i>"
+                text=f"Потребуется url фотографии товара:"
             )
             await state.set_state(AddProduct.image_url)
         else:
@@ -276,13 +274,14 @@ async def accept_add_product_btn(callback: CallbackQuery, state: FSMContext):
                 'company_name': company_name_response.json()['company_name'],
         })
 
+    await state.clear()
     if company_name_response.status_code == 200 and add_product_response.status_code == 200:
         await callback.bot.delete_message(
             chat_id=callback.message.chat.id, 
             message_id=callback.message.message_id
         )
         await callback.message.answer(
-            text="✅ Товар передан модерации и как только мы всё проверим, не медля, сообщим вам!",
+            text="✅ Товар отправлен на модерацию и как только мы всё проверим, не медля, сообщим вам!",
             reply_markup=ReplyKeyboardRemove()
         )
     else:

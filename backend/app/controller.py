@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from datetime import datetime
-from .models import Seller, Buyer, Support
-from .schemas import CreateBuyerModel, CreateSellerModel, CreateQuestionToSupport, CreateAnswerQuestionToSupport
+from .models import Seller, Buyer, Support, Product
+from .schemas import CreateBuyerModel, CreateSellerModel, CreateQuestionToSupport, CreateAnswerQuestionToSupport, AddProductModel
 
 controller = APIRouter()
 
@@ -43,6 +43,21 @@ async def create_buyer(data: CreateBuyerModel):
         }
     )
     return {'user_id': buyer.user_id, 'created': created}
+
+
+# --- Добавление товара ---
+@controller.post('/add_product')
+async def add_product(data: AddProductModel):
+    await Product.create(
+        product_name = data.product_name,
+        product_description = data.product_description,
+        product_price = data.product_price,
+        product_category = data.product_category,
+        product_subcategory = data.product_subcategory,
+        product_subsubcategory = data.product_subsubcategory,
+        product_image_url = data.product_image_url,
+        company_name = data.company_name
+    )
 
 
 # --- Получение всех сообщений в поддержку --- 

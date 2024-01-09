@@ -95,10 +95,6 @@ def seller_panel_btns() -> InlineKeyboardBuilder:
         InlineKeyboardButton(
             text="Товары на модерации ⚙️",
             callback_data="cheak_product_on_moderation"
-        ),
-        InlineKeyboardButton(
-            text="Заказы 📂",
-            callback_data="ordering"
         )
     )
     builder.adjust(1, 1)
