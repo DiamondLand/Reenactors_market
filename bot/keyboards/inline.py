@@ -80,6 +80,31 @@ def support_panel_btns() -> InlineKeyboardBuilder:
     return builder
 
 
+# --- Панель продавца ---
+def seller_panel_btns() -> InlineKeyboardBuilder:
+    builder = InlineKeyboardBuilder()
+    builder.add(
+        InlineKeyboardButton(
+            text="В магазин 🛍️",
+            callback_data="shop_open"
+        ),
+        InlineKeyboardButton(
+            text="Добавить товар ➕",
+            callback_data="add_product_to_moderation"
+        ),
+        InlineKeyboardButton(
+            text="Товары на модерации ⚙️",
+            callback_data="cheak_product_on_moderation"
+        ),
+        InlineKeyboardButton(
+            text="Заказы 📂",
+            callback_data="ordering"
+        )
+    )
+    builder.adjust(1, 1)
+    return builder
+
+
 # --- Завершение регистрации ---
 def сompletion_sellers_registration_btns() -> InlineKeyboardBuilder:
     builder = InlineKeyboardBuilder()
@@ -91,6 +116,22 @@ def сompletion_sellers_registration_btns() -> InlineKeyboardBuilder:
         InlineKeyboardButton(
             text="Я ошибся 😐",
             callback_data="refresh_seller_account_creating"
+        )
+    )
+    return builder
+
+
+# --- Завершение добавления товара ---
+def сompletion_add_product_btns() -> InlineKeyboardBuilder:
+    builder = InlineKeyboardBuilder()
+    builder.add(
+        InlineKeyboardButton(
+            text="Всё верно 😎",
+            callback_data="accept_add_product"
+        ),
+        InlineKeyboardButton(
+            text="Я ошибся 😐",
+            callback_data="refresh_add_product"
         )
     )
     return builder
