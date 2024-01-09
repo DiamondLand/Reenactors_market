@@ -10,7 +10,7 @@ from configs.answers import no_state_but_button_is
 # --- StatesGroup для регистрации продавца ---
 class AddSeller(StatesGroup):
     company_name = State()
-    phone = State()
+    contact = State()
 
 
 # --- StatesGroup для работы с чатом поддержки ---
@@ -20,7 +20,7 @@ class SupportConnect(StatesGroup):
 
 
 # Блокирующий фильтр для использования команд во время стадий
-not_in_state_filter = ~StateFilter(AddSeller.company_name, AddSeller.phone, SupportConnect.to_support_text)
+not_in_state_filter = ~StateFilter(AddSeller.company_name, AddSeller.contact, SupportConnect.to_support_text)
 
 
 # --- Завершение заполнения формы по кнопке отмены ---

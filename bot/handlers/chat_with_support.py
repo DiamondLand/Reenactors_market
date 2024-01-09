@@ -45,7 +45,7 @@ async def display_question(res, msg: Message = None, callback: CallbackQuery = N
 async def display_question_for_support(res, callback: CallbackQuery):
     all_text = f"📥 <b>Вопрос пользователя:</b>\
         \n<i>{res['question']}</i>\
-        \n\n⌚ <b>Пользователь обратился </b>\n<i>{datetime.fromisoformat(res['question_date']).strftime('%m-%d-%Y %H:%M:%S по МСК')}</i>"
+        \n\n⌚ <b>Пользователь обратился </b>\n<i>{datetime.fromisoformat(res['question_date']).strftime('%d-%m-%Y %H:%M:%S по МСК')}</i>"
 
     if callback:
         await callback.message.edit_text(

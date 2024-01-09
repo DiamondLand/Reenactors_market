@@ -5,101 +5,77 @@ from .schemas import CreateBuyerModel, CreateSellerModel, CreateQuestionToSuppor
 
 controller = APIRouter()
 
-
 # --- Проверка наличия аккаунта Seller --- 
 @controller.get('/get_seller')
 async def get_seller(user_id: int):
     res = await Seller.get_or_none(user_id=user_id)
-    if res:
-        return res
-    else:
-        return None
-    
+    return res
 
-# --- Проверка привелегий аккаунта --- 
+
+# --- Проверка привилегий аккаунта --- 
 @controller.get('/get_privilege')
 async def get_privilege(user_id: int):
     res = await Buyer.get_or_none(user_id=user_id)
-    if res and res.privilege:
-        return res.privilege
-    else:
-        return None
-    
+    return res.privilege if res and res.privilege else None
+
 
 # --- Регистрация Seller ---
 @controller.post('/create_seller')
 async def create_seller(data: CreateSellerModel):
-    new, _ = await Seller.update_or_create(
+    new_seller, created = await Seller.get_or_create(
         user_id=data.user_id,
         defaults={
-            'username': data.username,
             'company_name': data.company_name,
-            'phone': data.phone_number,
-            'sold': data.sold
+            'contact': data.contact,
         }
     )
-    return {'user_id': new.user_id}
+    return {'user_id': new_seller.user_id, 'created': created}
 
 
 # --- Регистрация Buyer ---
 @controller.post('/create_buyer')
 async def create_buyer(data: CreateBuyerModel):
-    res = await Buyer.get_or_none(user_id=data.user_id)
-    if not res:
-        await Buyer.create(
-            user_id = data.user_id,
-            username = data.username,
-            purchased = data.purchased,
-            privilege = data.privilege
-        )
+    buyer, created = await Buyer.get_or_create(
+        user_id=data.user_id,
+        defaults={
+            'username': data.username,
+            'privilege': data.privilege
+        }
+    )
+    return {'user_id': buyer.user_id, 'created': created}
 
-
-# --- Проверка привелегий аккаунта --- 
-@controller.get('/get_privilege')
-async def get_privilege(user_id: int):
-    res = await Buyer.get_or_none(user_id=user_id)
-    if res and res.privilege:
-        return res.privilege
-    else:
-        return None
-    
 
 # --- Получение всех сообщений в поддержку --- 
 @controller.get('/get_messages_on_support')
 async def get_messages_on_support(user_id: int):
     res = await Support.filter(user_id=user_id).order_by('-question_date').all()
-    if res:
-        return res
-    else:
-        return None
-    
+    return res
+
 
 # --- Получение сообщений в поддержку без ответа --- 
 @controller.get('/get_messages_on_support_for_staff')
 async def get_messages_on_support_for_staff():
     res = await Support.filter(answer=None).order_by('-question_date').all()
-    if res:
-        return res
-    else:
-        return None
+    return res
 
 
 # --- Новый вопрос поддержке ---
 @controller.post('/send_question')
 async def send_question(data: CreateQuestionToSupport):
-    await Support.create(
-        user_id = data.user_id,
-        question = data.question,
-        question_date = datetime.now()
+    support = await Support.create(
+        user_id=data.user_id,
+        question=data.question,
+        question_date=datetime.now()
     )
+    return support
 
 
 # --- Запись ответа от поддержки ---
 @controller.post('/answer_question')
 async def answer_question(data: CreateAnswerQuestionToSupport):
-    await Support.filter(user_id = data.user_id, question=data.question).update(
+    support = await Support.filter(user_id = data.user_id, question=data.question).update(
         answer_username = data.answer_username,
         answer = data.answer,
         answer_date = datetime.now()
     )
-
+    return support

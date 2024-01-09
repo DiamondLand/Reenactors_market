@@ -44,33 +44,35 @@ async def i_am_buyer_btn(callback: CallbackQuery):
             'username': callback.from_user.username
         })
         # --- Проверка привелегии ---
-        response2 = privilege_res = await client.get(
+        privilege_res = await client.get(
             f"{callback.bot.config['SETTINGS']['backend_url']}get_privilege?user_id={callback.from_user.id}"
         )
-    if response.status_code == 200 and response2.status_code == 200:
-        if privilege_res.json() == 'admin':
-            await callback.message.edit_text(
-                text=f"Добро пожаловать, @{callback.from_user.username}!\
-                \n\nВы — <b>администратор</b>.\
-                \n\n<i>Начнём работу с контроля товаров, или с запросов в поддержку? 😊</i>",
-                reply_markup=admin_panel_btns().as_markup()
-            )
-            return
-        if privilege_res.json() == 'support':
-            await callback.message.edit_text(
-                text=f"Добро пожаловать, @{callback.from_user.username}!\
-                \n\nВы — <b>оператор поддержки</b>.\
-                \n\n<i>Давайте посмотрим новые запросы в поддержку? 😊</i>",
-                reply_markup=support_panel_btns().as_markup()
-            )
-            return
-        
-        await callback.message.edit_text(
-            text=f"Добро пожаловать, @{callback.from_user.username}!\
-            \n\nВы — <b>покупатель</b>.\
-            \n\n<i>Хотите заглянуть в магазин? 😊</i>",
-            reply_markup=shop_open_btn().as_markup()
-        )
+
+    if response.status_code == 200 and privilege_res.status_code == 200:
+        match privilege_res.json():
+            case 'admin':
+                await callback.message.edit_text(
+                    text=f"Добро пожаловать, @{callback.from_user.username}!\
+                    \n\nВы — <b>администратор</b>.\
+                    \n\n<i>Начнём работу с контроля товаров, или с запросов в поддержку? 😊</i>",
+                    reply_markup=admin_panel_btns().as_markup()
+                )
+                
+            case 'support':
+                await callback.message.edit_text(
+                    text=f"Добро пожаловать, @{callback.from_user.username}!\
+                    \n\nВы — <b>оператор поддержки</b>.\
+                    \n\n<i>Давайте посмотрим новые запросы в поддержку? 😊</i>",
+                    reply_markup=support_panel_btns().as_markup()
+                )
+                
+            case _:     
+                await callback.message.edit_text(
+                    text=f"Добро пожаловать, @{callback.from_user.username}!\
+                    \n\nВы — <b>покупатель</b>.\
+                    \n\n<i>Хотите заглянуть в магазин? 😊</i>",
+                    reply_markup=shop_open_btn().as_markup()
+                )
     else:
         await callback.answer(text=response_server_error)
 
@@ -106,7 +108,7 @@ async def i_am_seller_btn(callback: CallbackQuery, state: FSMContext):
             await state.set_state(AddSeller.company_name)
         else:
             await callback.message.edit_text(
-                text=f"Добро пожаловать, @{callback.from_user.username}!\n\nВы — продавец.\n\n<i>Не забудьте проверить возможные заказы 🤑</i>",
+                text=f"Добро пожаловать, @{callback.from_user.username}!\n\nВы — продавец.\n\n",
                 reply_markup=None
             )
     else:
@@ -120,21 +122,21 @@ async def get_company_name(message: Message, state: FSMContext):
         await message.answer(text=slash_on_state)
     else:
         data = await state.get_data()        
-        data['name'] = message.text[:50]
-
+        data['company_name'] = message.text[:50]
         await state.update_data(data)
+        
         await message.answer(
             text=f"<b>{message.text[:50]}?</b> — звучит отлично!\
-            \n\n<b>Нам потребуется Ваш номер телефона,</b> но мы никому про это не расскажем 😉\
-            \n\n<i>Введите его в удобном формате, а дальше позаботимся мы:</i>"
+            \n\n<b>Нам потребуется дополнительный контакт для связи продавца с Вами.</b>\
+            \n\n<i>Предоставьте информацию о любом способе связи, исключая Telegram:</i>"
         )
-        await state.set_state(AddSeller.phone)
+        await state.set_state(AddSeller.contact)
 
 
-# --- Стадия 2. Ввод номера телефона ---
+# --- Стадия 2. Ввод способа для связи ---
 import re
 
-@router.message(AddSeller.phone)
+@router.message(AddSeller.contact)
 async def get_company_name(message: Message, state: FSMContext):
     if message.text.startswith("/"):
         await message.answer(text=slash_on_state)
@@ -145,23 +147,29 @@ async def get_company_name(message: Message, state: FSMContext):
         if not data:
             await message.answer(text=no_state)
             return
-        
-        phone_number = re.sub(r'[\s+]', '', message.text)
-        if re.match(r'^\d{11}$', phone_number):
-            formatted_phone_number = f"+7 ({phone_number[1:4]}) {phone_number[4:7]}-{phone_number[7:9]}-{phone_number[9:]}"
 
-            data['formatted_phone_number'] = formatted_phone_number
-            await state.update_data(data)
-            await message.answer(
-                text=f"<b>Подытожим:</b>\
-                \n\n✅ Ваш рабочий аккаунт: @{message.from_user.username}\
-                \n✅ Название фирмы: <i>{data['name']}</i>\
-                \n✅ Номер телефона: <i>{data['formatted_phone_number']}</i>\
-                \n\n<i>Мы покажем ваш рабочий аккаунт рядом с выставленным товаром.</i>",
-                reply_markup=сompletion_sellers_registration_btns().as_markup()
-            )
+        if message.text and any(char.isdigit() for char in message.text):
+            phone_number = re.sub(r'\D', '', message.text) # Оставить только цифры
+            if len(phone_number) == 11:
+                contact = f"+7 ({phone_number[1:4]}) {phone_number[4:7]}-{phone_number[7:9]}-{phone_number[9:]}"
+            else:
+                await message.answer("❌ <b>Нет-нет-нет!</b>\n\nПохоже, Вы пытались указать номер телефона, но он должен состоять из <b>11 цифр</b>.\n\n<i>Пожалуйста, повторите попытку:</i>")
+                return
         else:
-            await message.answer("❌ <b>Нет-нет-нет!</b>\n\nНомер должен состоять из <b>11 цифр</b>.\n\n<i>Пожалуйста, повторите попытку:</i>")
+            contact = message.text[:100]
+
+        data['contact'] = contact
+        await state.update_data(data)
+
+        text = (
+            f"<b>Подытожим:</b>"
+            f"\n\n✅ Ваш рабочий аккаунт: @{message.from_user.username}"
+            f"\n✅ Название фирмы: <i>{data['company_name']}</i>"
+            f"\n✅ Резервный способ связи: <i>{data['contact']}</i>"
+            f"\n\n<i>Мы покажем данную информацию рядом с выставленным товаром.</i>"
+        )
+
+        await message.answer(text, reply_markup=сompletion_sellers_registration_btns().as_markup())
 
 
 # --- Обработчик кнопоки завершения регистрации продавца ---
@@ -178,13 +186,10 @@ async def accept_seller_account_creating_btn(callback: CallbackQuery, state: FSM
     async with httpx.AsyncClient() as client:
         response = await client.post(callback.bot.config["SETTINGS"]["backend_url"] + 'create_seller', json={
             'user_id': callback.from_user.id,
-            'username': callback.from_user.username,
-            'company_name': data['name'],
-            'phone_number': data['formatted_phone_number'],
-            'sold': 0
+            'company_name': data['company_name'],
+            'contact': data['contact'],
         })
-
-    
+        
         if response.status_code == 200:
             await callback.message.edit_text(
                 text=f"Добро пожаловать, @{callback.from_user.username}!\n\nВы — продавец.\n\n<i>Не затягивайте, выставляйте свои потрясающие товары! 💖</i>",
