@@ -5,7 +5,11 @@ from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from loguru import logger
 
-from handlers import register_panel, different_types, info_panel, chat_with_support, add_product
+from handlers import different_types
+from handlers.register import register_panel
+from handlers.seller import add_product
+from handlers.support import chat_with_support, info_panel
+from handlers.admin import product_moderation
 
 config = configparser.ConfigParser()
 config.read("bot/configs/config.ini")
