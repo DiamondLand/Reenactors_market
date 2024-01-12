@@ -78,8 +78,8 @@ async def cmd_support(message: Message):
         privilege_res = await client.get(
             f"{message.bot.config['SETTINGS']['backend_url']}get_privilege?user_id={message.from_user.id}"
         )
-        if buyer_response.status_code == 200 and privilege_res.status_code == 200:
-            if privilege_res.json() == 'admin' or privilege_res.json() == 'support':
+        if buyer_response.status_code == privilege_res.status_code == 200:
+            if privilege_res.json() in ['admin', 'support']:
                 await message.answer(
                     f"💌 <b>Готовы помочь пользователям?</b>\
                     \n\nВы — это тот человек, на которого расчитывают пользователи!\
@@ -163,8 +163,8 @@ async def chat_with_support_btn(callback: CallbackQuery):
         privilege_res = await client.get(
             f"{callback.bot.config['SETTINGS']['backend_url']}get_privilege?user_id={callback.from_user.id}"
         )
-        if buyer_response.status_code == 200 and privilege_res.status_code == 200:
-            if privilege_res.json() == 'admin' or privilege_res.json() == 'support':
+        if buyer_response.status_code == privilege_res.status_code == 200:
+            if privilege_res.json() in ['admin', 'support']:
                 async with httpx.AsyncClient() as client:
                     response = await client.get(
                         f"{callback.bot.config['SETTINGS']['backend_url']}get_messages_on_support_for_staff"

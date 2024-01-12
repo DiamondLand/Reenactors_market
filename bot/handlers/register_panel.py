@@ -48,7 +48,7 @@ async def i_am_buyer_btn(callback: CallbackQuery):
             f"{callback.bot.config['SETTINGS']['backend_url']}get_privilege?user_id={callback.from_user.id}"
         )
 
-    if response.status_code == 200 and privilege_res.status_code == 200:
+    if response.status_code == privilege_res.status_code == 200:
         match privilege_res.json():
             case 'admin':
                 await callback.message.edit_text(

@@ -81,7 +81,13 @@ async def get_product_description(message: Message, state: FSMContext):
     if message.text.startswith("/"):
         await message.answer(text=slash_on_state)
     else:
-        data = await state.get_data()        
+        data = await state.get_data()
+
+        # --- Проверка на существование стадии ---
+        if not data:
+            await message.answer(text=no_state)
+            return
+         
         data['product_description'] = message.text[:100]
 
         await state.update_data(data)
@@ -99,6 +105,12 @@ async def get_product_price(message: Message, state: FSMContext):
         await message.answer(text=slash_on_state)
     else:
         data = await state.get_data()
+
+        # --- Проверка на существование стадии ---
+        if not data:
+            await message.answer(text=no_state)
+            return
+        
         only_numbers = re.sub(r'\D', '', message.text)
 
         if len(str(only_numbers)) >= 1:
@@ -107,7 +119,7 @@ async def get_product_price(message: Message, state: FSMContext):
 
                 await state.update_data(data)
                 await message.answer(
-                    text=f"<b>Укажите категория товара:</b>\
+                    text=f"<b>Укажите категорию товара...</b>\
                     \n\nПожалуйста, перепишите название из предложенного списка:\
                     \n\n➡️ <i>{', '.join(category)}</i>"
                 )
@@ -126,19 +138,25 @@ async def get_product_price(message: Message, state: FSMContext):
             )
 
 
-# --- Стадия 3. Ввод категории ---
+# --- Стадия 4. Ввод категории ---
 @router.message(AddProduct.category)
 async def get_product_category(message: Message, state: FSMContext):
     if message.text.startswith("/"):
         await message.answer(text=slash_on_state)
     else:
         data = await state.get_data()
+
+        # --- Проверка на существование стадии ---
+        if not data:
+            await message.answer(text=no_state)
+            return
+        
         if message.text.lower() in category:
             data['product_category'] = message.text
         
             await state.update_data(data)
             await message.answer(
-                text=f"<b>Выберите страну, как подкатегорию</b>\
+                text=f"<b>Выберите страну, как подкатегорию...</b>\
                 \n\n➡️ <i>{', '.join(word.capitalize() for word in subcategory)}</i>"
             )
             await state.set_state(AddProduct.subcategory)
@@ -150,13 +168,19 @@ async def get_product_category(message: Message, state: FSMContext):
             )
 
 
-# --- Стадия 4. Ввод подкатегории ---
+# --- Стадия 5. Ввод подкатегории ---
 @router.message(AddProduct.subcategory)
 async def get_product_subcategory(message: Message, state: FSMContext):
     if message.text.startswith("/"):
         await message.answer(text=slash_on_state)
     else:
         data = await state.get_data()
+
+        # --- Проверка на существование стадии ---
+        if not data:
+            await message.answer(text=no_state)
+            return
+        
         if message.text.lower() in subcategory:
             data['product_subcategory'] = message.text
         
@@ -175,13 +199,19 @@ async def get_product_subcategory(message: Message, state: FSMContext):
             )
 
 
-# --- Стадия 5. Ввод подподкатегории ---
+# --- Стадия 6. Ввод подподкатегории ---
 @router.message(AddProduct.subsubcategory)
 async def get_product_subsubcategory(message: Message, state: FSMContext):
     if message.text.startswith("/"):
         await message.answer(text=slash_on_state)
     else:
         data = await state.get_data()
+
+        # --- Проверка на существование стадии ---
+        if not data:
+            await message.answer(text=no_state)
+            return
+        
         if message.text.lower() in subsubcategory:
             data['product_subsubcategory'] = message.text
         
@@ -198,7 +228,7 @@ async def get_product_subsubcategory(message: Message, state: FSMContext):
             )
 
 
-# --- Стадия 6. Ввод ссылки ---
+# --- Стадия 7. Ввод ссылки ---
 @router.message(AddProduct.image_url)
 async def get_product_image_url(message: Message, state: FSMContext):
     if message.text.startswith("/"):
@@ -206,6 +236,11 @@ async def get_product_image_url(message: Message, state: FSMContext):
     else:
         data = await state.get_data()
 
+        # --- Проверка на существование стадии ---
+        if not data:
+            await message.answer(text=no_state)
+            return
+        
         # Проверка на корректность URL
         if not validators.url(message.text):
             await message.answer(
@@ -275,7 +310,7 @@ async def accept_add_product_btn(callback: CallbackQuery, state: FSMContext):
         })
 
     await state.clear()
-    if company_name_response.status_code == 200 and add_product_response.status_code == 200:
+    if company_name_response.status_code == add_product_response.status_code == 200:
         await callback.bot.delete_message(
             chat_id=callback.message.chat.id, 
             message_id=callback.message.message_id
