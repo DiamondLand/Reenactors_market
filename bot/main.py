@@ -4,12 +4,13 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from loguru import logger
+from bot.handlers.seller import products_on_moderation
 
-from handlers import different_types
 from handlers.register import register_panel
 from handlers.seller import add_product
 from handlers.support import chat_with_support, info_panel
 from handlers.admin import product_moderation
+from handlers import different_types
 
 config = configparser.ConfigParser()
 config.read("bot/configs/config.ini")
@@ -25,9 +26,11 @@ async def main():
     logger.info("Loading modules...")
     dp.include_routers(
         register_panel.router,
+        product_moderation.router,
         add_product.router,
-        info_panel.router,
+        products_on_moderation.router,
         chat_with_support.router,
+        info_panel.router,
         different_types.router
     )
 

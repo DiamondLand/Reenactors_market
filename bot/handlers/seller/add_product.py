@@ -64,15 +64,37 @@ async def get_product_name(message: Message, state: FSMContext):
     if message.text.startswith("/"):
         await message.answer(text=slash_on_state)
     else:
-        data = await state.get_data()        
-        data['product_name'] = message.text[:50]
+        async with httpx.AsyncClient() as client:
+            # --- Берём данные о компании продавца ---
+            company_name_response = await client.get(
+                f"{message.bot.config['SETTINGS']['backend_url']}get_seller?user_id={message.from_user.id}"
+            )
 
-        await state.update_data(data)
-        await message.answer(
-            text=f"<b>Укажите описание товара:</b>\
-            \n\n<i>Помните, лимит символов — 100. Текст больше будет обрезан!</i>"
-        )
-        await state.set_state(AddProduct.description)
+            # --- Проверка на повторение записи ---
+            check_duplicate_product = await client.get(
+                f"{message.bot.config['SETTINGS']['backend_url']}check_duplicate_product",
+                params={'company_name': company_name_response, 'product_name': message.text[:50]}
+            )
+        if check_duplicate_product.status_code == 200:
+            if check_duplicate_product:
+                await message.answer(
+                    text=f"<b>❌ Товар уже существует!</b>\
+                    \n\n<i>Товар с названием <u>{message.text[:50]}</u> уже существует в вашем профиле!</i>"
+                )
+                return
+            else:
+                data = await state.get_data()        
+                data['product_name'] = message.text[:50]
+
+                await state.update_data(data)
+                await message.answer(
+                    text=f"<b>Укажите описание товара:</b>\
+                    \n\n<i>Помните, лимит символов — 100. Текст больше будет обрезан!</i>"
+                )
+                await state.set_state(AddProduct.description)
+        else:
+            await message.edit_text(text=response_server_error)
+
 
 
 # --- Стадия 2. Ввод описания ---
