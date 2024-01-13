@@ -3,24 +3,24 @@ from fastapi import APIRouter
 from .models import Seller, Buyer
 from .schemas import CreateBuyerModel, CreateSellerModel
 
-client = APIRouter()
+reg = APIRouter()
 
 # --- Проверка наличия аккаунта Seller ---
-@client.get('/get_seller')
+@reg.get('/get_seller')
 async def get_seller(user_id: int):
     res = await Seller.get_or_none(user_id=user_id)
     return res
 
 
 # --- Проверка привилегий аккаунта ---
-@client.get('/get_privilege')
+@reg.get('/get_privilege')
 async def get_privilege(user_id: int):
     res = await Buyer.get_or_none(user_id=user_id)
     return res.privilege if res and res.privilege else None
 
 
 # --- Регистрация Seller ---
-@client.post('/create_seller')
+@reg.post('/create_seller')
 async def create_seller(data: CreateSellerModel):
     new_seller, created = await Seller.get_or_create(
         user_id=data.user_id,
@@ -33,7 +33,7 @@ async def create_seller(data: CreateSellerModel):
 
 
 # --- Регистрация Buyer ---
-@client.post('/create_buyer')
+@reg.post('/create_buyer')
 async def create_buyer(data: CreateBuyerModel):
     buyer, created = await Buyer.get_or_create(
         user_id=data.user_id,
