@@ -271,7 +271,6 @@ async def write_to_support_text(message: Message, state: FSMContext):
             await message.answer(text=response_server_error, reply_markup=ReplyKeyboardRemove())
         
 
-
 # --- Обработчик кнопоки написания сообщения от поддержки пользователю ---
 @router.callback_query(not_in_state_filter, F.data == "wrtite_to_buyer_support")
 async def wrtite_to_buyer_support_btn(callback: CallbackQuery, state: FSMContext):

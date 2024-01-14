@@ -101,6 +101,27 @@ def seller_panel_btns() -> InlineKeyboardBuilder:
     return builder
 
 
+# --- Просмотрт товаров на модерации---
+def seller_products_on_modering_btns() -> InlineKeyboardBuilder:
+    builder = InlineKeyboardBuilder()
+    builder.add(
+        InlineKeyboardButton(
+            text="Назад",
+            callback_data="back_on_seller_products_on_modering"
+        ),
+        InlineKeyboardButton(
+            text="Далее",
+            callback_data="next_on_seller_products_on_modering"
+        ),
+        InlineKeyboardButton(
+            text="Добавить товар ➕",
+            callback_data="add_product_to_moderation"
+        )
+    )
+    builder.adjust(2, 1)
+    return builder
+
+
 # --- Завершение регистрации ---
 def сompletion_sellers_registration_btns() -> InlineKeyboardBuilder:
     builder = InlineKeyboardBuilder()

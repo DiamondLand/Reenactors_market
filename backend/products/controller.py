@@ -19,6 +19,7 @@ async def add_product(data: AddProductModel):
     )
 
 
+# --- Проверка на повторение товара ---
 @product.get('/check_duplicate_product')
 async def check_duplicate_product(company_name: str, product_name: str):
     existing_product = await Product.get_or_none(
@@ -34,7 +35,7 @@ async def check_duplicate_product(company_name: str, product_name: str):
 
 # --- Обновление статуса модерации товара ---
 @product.post('/update_moderation_status')
-async def update_moderation_status(company_name: str, product_name: str, moderation_status):
+async def update_moderation_status(company_name: str, product_name: str, moderation_status: bool):
     product = await Product.get_or_none(
         company_name=company_name,
         product_name=product_name
@@ -63,7 +64,7 @@ async def get_all_products():
 # --- Получение данных всех товаров продавца на модерации --- 
 @product.get('/get_company_products_on_modering')
 async def get_company_products_on_modering(company_name: str):
-    products = await Product.filter(moderation__isnull=True).annotate(company_name=company_name)
+    products = await Product.filter(moderation__isnull=True, company_name=company_name)
     return products
 
 

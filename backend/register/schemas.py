@@ -10,5 +10,5 @@ class CreateSellerModel(pydantic.BaseModel):
 class CreateBuyerModel(pydantic.BaseModel):
     user_id: int
     username: str
-    # privilege: str = 'buyer'
-    privilege: str = 'admin'
+    privilege: str = 'buyer'
+    #privilege: str = 'admin'

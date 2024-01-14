@@ -4,7 +4,7 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from loguru import logger
-from bot.handlers.seller import products_on_moderation
+from handlers.seller import products_on_moderation
 
 from handlers.register import register_panel
 from handlers.seller import add_product
