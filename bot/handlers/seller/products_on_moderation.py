@@ -5,13 +5,13 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, CallbackQuery
 
 from configs.answers import *
 from configs.states_group import not_in_state_filter
-from keyboards.inline import seller_products_on_modering_btns
+from keyboards.inline import seller_products_on_moderation_btns
 from configs.patterns import send_product_card
 
 
 router = Router()
 products_indices = {}
-seller_products_on_modering_response = {}
+seller_products_on_moderation_response = {}
 
 # --- Отображение товаров на модерации для продавца ---
 async def display_card(res, callback: CallbackQuery = None):
@@ -25,7 +25,7 @@ async def display_card(res, callback: CallbackQuery = None):
             subcategory=res['product_subcategory'],
             subsubcategory=res['product_subsubcategory']
         ),
-        reply_markup=seller_products_on_modering_btns().as_markup()
+        reply_markup=seller_products_on_moderation_btns().as_markup()
     )
 
 
@@ -48,17 +48,17 @@ async def cheak_product_on_moderation_btn(callback: CallbackQuery):
         else:
             # --- Берём данные о товарах на модерации ---
             async with httpx.AsyncClient() as client:
-                get_company_products_on_modering = await client.get(
-                    f"{callback.bot.config['SETTINGS']['backend_url']}get_company_products_on_modering?company_name={seller_response.json()['company_name']}"
+                get_company_products_on_moderation = await client.get(
+                    f"{callback.bot.config['SETTINGS']['backend_url']}get_company_products_on_moderation?company_name={seller_response.json()['company_name']}"
                 )
-            if get_company_products_on_modering.status_code == 200:
+            if get_company_products_on_moderation.status_code == 200:
 
-                company_products_on_modering = get_company_products_on_modering.json()
-                seller_products_on_modering_response[callback.from_user.id] = company_products_on_modering
+                company_products_on_moderation = get_company_products_on_moderation.json()
+                seller_products_on_moderation_response[callback.from_user.id] = company_products_on_moderation
                 products_indices[callback.from_user.id] = 0
 
-                if company_products_on_modering and len(company_products_on_modering) > 0:
-                    await display_card(res=company_products_on_modering[0], callback=callback)
+                if company_products_on_moderation and len(company_products_on_moderation) > 0:
+                    await display_card(res=company_products_on_moderation[0], callback=callback)
                 else:
                     await callback.message.answer(
                         text="У Вас отсутствуют товары на модерации. Вероятнее всего они уже в магазине 🤩",
@@ -70,10 +70,10 @@ async def cheak_product_on_moderation_btn(callback: CallbackQuery):
 
 
 # --- Обработчик кнопоки ДАЛЕЕ ---
-@router.callback_query(not_in_state_filter, F.data == "next_on_seller_products_on_modering")
-async def next_on_seller_products_on_modering_btn(callback: CallbackQuery):
+@router.callback_query(not_in_state_filter, F.data == "next_on_seller_products_on_moderation")
+async def next_on_seller_products_on_moderation_btn(callback: CallbackQuery):
     user_id = callback.from_user.id
-    messages = seller_products_on_modering_response[user_id]
+    messages = seller_products_on_moderation_response[user_id]
     current_index = products_indices.get(user_id, 0)
 
     if messages and len(messages) > current_index + 1:
@@ -87,14 +87,14 @@ async def next_on_seller_products_on_modering_btn(callback: CallbackQuery):
 
 
 # --- Обработчик кнопоки НАЗАД ---
-@router.callback_query(not_in_state_filter, F.data == "back_on_seller_products_on_modering")
-async def back_on_seller_products_on_modering_btn(callback: CallbackQuery):
+@router.callback_query(not_in_state_filter, F.data == "back_on_seller_products_on_moderation")
+async def back_on_seller_products_on_moderation_btn(callback: CallbackQuery):
     user_id = callback.from_user.id
     if products_indices.get(user_id) is not None:
         current_index = products_indices[user_id]
         if current_index > 0:
             products_indices[user_id] -= 1
-            messages = seller_products_on_modering_response[user_id]
+            messages = seller_products_on_moderation_response[user_id]
             await display_card(res=messages[current_index - 1], callback=callback)
         else:
             await callback.answer(

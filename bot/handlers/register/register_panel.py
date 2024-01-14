@@ -1,4 +1,5 @@
 import httpx
+import re
 
 from aiogram import Router, F
 from aiogram.filters import Command
@@ -49,7 +50,7 @@ async def i_am_buyer_btn(callback: CallbackQuery):
         )
 
     if response.status_code == privilege_res.status_code == 200:
-        match privilege_res.json():
+        match privilege_res.json()['privilege']:
             case 'admin':
                 await callback.message.edit_text(
                     text=f"Добро пожаловать, @{callback.from_user.username}!\
@@ -134,8 +135,6 @@ async def get_company_name(message: Message, state: FSMContext):
 
 
 # --- Стадия 2. Ввод способа для связи ---
-import re
-
 @router.message(AddSeller.contact)
 async def get_company_name(message: Message, state: FSMContext):
     if message.text.startswith("/"):

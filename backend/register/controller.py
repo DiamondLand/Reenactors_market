@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-
 from .models import Seller, Buyer
 from .schemas import CreateBuyerModel, CreateSellerModel
 
@@ -8,15 +7,13 @@ reg = APIRouter()
 # --- Проверка наличия аккаунта Seller ---
 @reg.get('/get_seller')
 async def get_seller(user_id: int):
-    res = await Seller.get_or_none(user_id=user_id)
-    return res
+    return await Seller.get_or_none(user_id=user_id)
 
 
 # --- Проверка привилегий аккаунта ---
 @reg.get('/get_privilege')
 async def get_privilege(user_id: int):
-    res = await Buyer.get_or_none(user_id=user_id)
-    return res.privilege if res and res.privilege else None
+    return await Buyer.get_or_none(user_id=user_id)
 
 
 # --- Регистрация Seller ---

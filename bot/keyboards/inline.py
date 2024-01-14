@@ -73,7 +73,7 @@ def support_panel_btns() -> InlineKeyboardBuilder:
         ),
         InlineKeyboardButton(
             text="Ответить на запросы 💌",
-            callback_data="chat_with_support"
+            callback_data="chat_with_buyer"
         )
     )
     builder.adjust(1, 1)
@@ -102,16 +102,16 @@ def seller_panel_btns() -> InlineKeyboardBuilder:
 
 
 # --- Просмотрт товаров на модерации---
-def seller_products_on_modering_btns() -> InlineKeyboardBuilder:
+def seller_products_on_moderation_btns() -> InlineKeyboardBuilder:
     builder = InlineKeyboardBuilder()
     builder.add(
         InlineKeyboardButton(
             text="Назад",
-            callback_data="back_on_seller_products_on_modering"
+            callback_data="back_on_seller_products_on_moderation"
         ),
         InlineKeyboardButton(
             text="Далее",
-            callback_data="next_on_seller_products_on_modering"
+            callback_data="next_on_seller_products_on_moderation"
         ),
         InlineKeyboardButton(
             text="Добавить товар ➕",
@@ -217,7 +217,7 @@ def on_chat_with_support_buyer_btn() -> InlineKeyboardBuilder:
         ),
         InlineKeyboardButton(
             text="Ответить",
-            callback_data="wrtite_to_buyer_support"
+            callback_data="wrtite_to_buyer"
         )
     )
     builder.adjust(2, 2)

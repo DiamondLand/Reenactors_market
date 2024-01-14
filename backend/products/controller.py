@@ -7,30 +7,16 @@ product = APIRouter()
 # --- Добавление товара ---
 @product.post('/add_product')
 async def add_product(data: AddProductModel):
-    await Product.create(
-        product_name = data.product_name,
-        product_description = data.product_description,
-        product_price = data.product_price,
-        product_category = data.product_category,
-        product_subcategory = data.product_subcategory,
-        product_subsubcategory = data.product_subsubcategory,
-        product_image_url = data.product_image_url,
-        company_name = data.company_name
-    )
+    await Product.create(**data.__dict__)
 
 
 # --- Проверка на повторение товара ---
 @product.get('/check_duplicate_product')
 async def check_duplicate_product(company_name: str, product_name: str):
-    existing_product = await Product.get_or_none(
+    return await Product.get_or_none(
         company_name=company_name,
         product_name=product_name
     )
-
-    if existing_product:
-        return True
-    else:
-        return False
 
 
 # --- Обновление статуса модерации товара ---
@@ -46,37 +32,40 @@ async def update_moderation_status(company_name: str, product_name: str, moderat
         await product.save()
 
 
+# --- ФУНКЦИЯ получения данных товаров на модерации ---
+def get_products_on_moderation(company_name=None):
+    return Product.filter(moderation__isnull=True, company_name=company_name)
 
-# --- Получение данных всех товаров на модерации --- 
-@product.get('/get_all_products_on_modering')
-async def get_all_products_on_modering():
-    products = await Product.filter(moderation__isnull=True)
-    return products
+# --- ФУНКЦИЯ получения данных товаров прошедших модерацию ---
+def get_products(company_name=None, moderation=None):
+    return Product.filter(company_name=company_name, moderation=moderation)
 
 
-# --- Получение данных всех товаров в магазине --- 
+# --- Получение данных всех товаров на модерации ---
+@product.get('/get_all_products_on_moderation')
+async def get_all_products_on_moderation():
+    return await get_products_on_moderation()
+
+
+# --- Получение данных всех товаров продавца на модерации ---
+@product.get('/get_company_products_on_moderation')
+async def get_company_products_on_moderation(company_name: str):
+    return await get_products_on_moderation(company_name)
+
+
+# --- Получение данных всех товаров в магазине ---
 @product.get('/get_all_products')
 async def get_all_products():
-    products = await Product.filter(moderation=True)
-    return products
+    return await get_products(moderation=True)
 
 
-# --- Получение данных всех товаров продавца на модерации --- 
-@product.get('/get_company_products_on_modering')
-async def get_company_products_on_modering(company_name: str):
-    products = await Product.filter(moderation__isnull=True, company_name=company_name)
-    return products
-
-
-# --- Получение данных всех товаров в магазине от продавца--- 
+# --- Получение данных всех товаров продавца в магазине ---
 @product.get('/get_company_products')
-async def get_company_products(company: str):
-    products = await Product.filter(company=company, moderation=True)
-    return products
+async def get_company_products(company_name: str):
+    return await get_products(company_name=company_name, moderation=True)
 
 
-# --- Получение данных всех отбракованных товара продавца на модерации --- 
-@product.get('/get_company_false_products_on_modering')
-async def get_company_false_products_on_modering(company_name: str):
-    products = await Product.filter(company_name=company_name, moderation=False)
-    return products
+# --- Получение данных всех отбракованных товара продавца на модерации ---
+@product.get('/get_company_false_products_on_moderation')
+async def get_company_false_products_on_moderation(company_name: str):
+    return await get_products(company_name=company_name, moderation=False)

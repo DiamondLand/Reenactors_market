@@ -79,7 +79,7 @@ async def cmd_support(message: Message):
             f"{message.bot.config['SETTINGS']['backend_url']}get_privilege?user_id={message.from_user.id}"
         )
         if buyer_response.status_code == privilege_res.status_code == 200:
-            if privilege_res.json() in ['admin', 'support']:
+            if privilege_res.json()['privilege'] in ['admin', 'support']:
                 await message.answer(
                     f"💌 <b>Готовы помочь пользователям?</b>\
                     \n\nВы — это тот человек, на которого расчитывают пользователи!\
@@ -151,7 +151,7 @@ async def next_question_to_support_btn(callback: CallbackQuery):
 
 
 # --- Обработчик кнопоки ответа на вопросы ---
-@router.callback_query(not_in_state_filter, F.data == "chat_with_support")
+@router.callback_query(not_in_state_filter, F.data == "chat_with_buyer")
 async def chat_with_support_btn(callback: CallbackQuery):
     # --- Проверка на существование записи и при отсутствии insert ---
     async with httpx.AsyncClient() as client:
@@ -164,7 +164,7 @@ async def chat_with_support_btn(callback: CallbackQuery):
             f"{callback.bot.config['SETTINGS']['backend_url']}get_privilege?user_id={callback.from_user.id}"
         )
         if buyer_response.status_code == privilege_res.status_code == 200:
-            if privilege_res.json() in ['admin', 'support']:
+            if privilege_res.json()['privilege'] in ['admin', 'support']:
                 async with httpx.AsyncClient() as client:
                     response = await client.get(
                         f"{callback.bot.config['SETTINGS']['backend_url']}get_messages_on_support_for_staff"
@@ -272,8 +272,8 @@ async def write_to_support_text(message: Message, state: FSMContext):
         
 
 # --- Обработчик кнопоки написания сообщения от поддержки пользователю ---
-@router.callback_query(not_in_state_filter, F.data == "wrtite_to_buyer_support")
-async def wrtite_to_buyer_support_btn(callback: CallbackQuery, state: FSMContext):
+@router.callback_query(not_in_state_filter, F.data == "wrtite_to_buyer")
+async def wrtite_to_buyer_btn(callback: CallbackQuery, state: FSMContext):
     await state.set_state(SupportConnect.to_buyer_text)
     # --- Обычная кнопка для отмены заполнения формы [cancel] ---
     kb = [[KeyboardButton(text=cancel_support_write_button_kb)]]
