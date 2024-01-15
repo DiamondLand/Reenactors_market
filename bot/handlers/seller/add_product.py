@@ -76,7 +76,7 @@ async def get_product_name(message: Message, state: FSMContext):
                 params={'company_name': company_name.json()['company_name'], 'product_name': message.text[:50]}
             )
         if check_duplicate_product.status_code == 200:
-            if check_duplicate_product.json() is True:
+            if check_duplicate_product.json():
                 await message.answer(
                     text=f"<b>❌ Товар уже существует!</b>\
                     \n\n<i>Товар с названием <u>{message.text[:50]}</u> уже существует в вашем профиле!</i>"
@@ -333,10 +333,7 @@ async def accept_add_product_btn(callback: CallbackQuery, state: FSMContext):
 
     await state.clear()
     if company_name_response.status_code == add_product_response.status_code == 200:
-        await callback.bot.delete_message(
-            chat_id=callback.message.chat.id, 
-            message_id=callback.message.message_id
-        )
+        await callback.message.delete()
         await callback.message.answer(
             text="✅ Товар отправлен на модерацию и как только мы всё проверим, не медля, сообщим вам!",
             reply_markup=ReplyKeyboardRemove()

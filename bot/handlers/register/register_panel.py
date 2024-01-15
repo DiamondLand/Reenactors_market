@@ -2,43 +2,20 @@ import httpx
 import re
 
 from aiogram import Router, F
-from aiogram.filters import Command
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
-from keyboards.inline import choice_account_btns, сompletion_sellers_registration_btns, admin_panel_btns, support_panel_btns, shop_open_btn, seller_panel_btns
+from keyboards.inline import сompletion_sellers_registration_btns, admin_panel_btns, support_panel_btns, shop_open_btn, seller_panel_btns
 from configs.answers import *
-from configs.states_group import AddSeller, not_in_state_filter, cancel_func
+from configs.states_group import AddSeller, not_in_state_filter
 
 
 router = Router()
 
-
-# --- Основная панель ---
-@router.message(not_in_state_filter, Command("start"))
-async def cmd_start(message: Message):
-    await message.answer(
-        "Добро пожаловать на маркетплейс для <b>реконструкторов</b> 💖\
-        \n\nДавайте знакомиться! Кто вы?",
-        reply_markup=choice_account_btns().as_markup()
-    )
-
-
-# --- Завершение заполнения ---
-@router.message(F.text == cancel_button_kb)
-async def cancel_register_handler(message: Message, state: FSMContext):
-    await cancel_func(message=message, state=state)
-    await message.answer(
-        "<b>Заполнение формы прервано!</b>\n\nВведённые данные не были сохранены!",
-        reply_markup=ReplyKeyboardRemove()
-    )
-    await cmd_start(message)
-
-
 # --- Обработчик кнопоки регистрации/авторизации покупателя ---
 @router.callback_query(not_in_state_filter, F.data == "i_am_buyer")
 async def i_am_buyer_btn(callback: CallbackQuery):
-    # --- Проверка на существование записи и при отсутствии insert ---
+    # --- Проверка на существование аккаунта покупателя и при отсутствии - создание ---
     async with httpx.AsyncClient() as client:
         response = await client.post(callback.bot.config["SETTINGS"]["backend_url"] + 'create_buyer', json={
             "user_id" : callback.from_user.id,
@@ -48,7 +25,7 @@ async def i_am_buyer_btn(callback: CallbackQuery):
         privilege_res = await client.get(
             f"{callback.bot.config['SETTINGS']['backend_url']}get_privilege?user_id={callback.from_user.id}"
         )
-
+    
     if response.status_code == privilege_res.status_code == 200:
         match privilege_res.json()['privilege']:
             case 'admin':
@@ -77,10 +54,11 @@ async def i_am_buyer_btn(callback: CallbackQuery):
     else:
         await callback.answer(text=response_server_error)
 
+
 # --- Обработчик кнопоки регистрации/авторизации продавца ---
 @router.callback_query(not_in_state_filter, F.data == "i_am_seller")
 async def i_am_seller_btn(callback: CallbackQuery, state: FSMContext):
-    # --- Проверка на существование записи ---
+    # --- Проверка на существование аккаунта продавца ---
     async with httpx.AsyncClient() as client:
         response = await client.get(
             f"{callback.bot.config['SETTINGS']['backend_url']}get_seller?user_id={callback.from_user.id}"
@@ -92,7 +70,6 @@ async def i_am_seller_btn(callback: CallbackQuery, state: FSMContext):
                 text="Похоже у Вас <b>нет аккаунта продавца</b>, но это не страшно! Мы создадим его прямо сейчас 😎",
                 reply_markup=None
             )
-
             # --- Обычная кнопка для отмены заполнения формы [cancel] ---
             kb = [[KeyboardButton(text=cancel_button_kb)]]
             keyboard = ReplyKeyboardMarkup(
@@ -122,16 +99,33 @@ async def get_company_name(message: Message, state: FSMContext):
     if message.text.startswith("/"):
         await message.answer(text=slash_on_state)
     else:
-        data = await state.get_data()        
-        data['company_name'] = message.text[:50]
-        await state.update_data(data)
-        
-        await message.answer(
-            text=f"<b>{message.text[:50]}?</b> — звучит отлично!\
-            \n\n<b>Нам потребуется дополнительный контакт для связи продавца с Вами.</b>\
-            \n\n<i>Предоставьте информацию о любом способе связи, исключая Telegram:</i>"
-        )
-        await state.set_state(AddSeller.contact)
+        company_name = message.text[:50]
+        # --- Проверка на существование комапании с таким же названием ---
+        async with httpx.AsyncClient() as client:
+            check_duplicate_company_name = await client.get(
+                f"{message.bot.config['SETTINGS']['backend_url']}check_duplicate_company_name?company_name={company_name}"
+            )
+
+        if check_duplicate_company_name.status_code == 200:
+            if check_duplicate_company_name.json():
+                await message.answer(
+                    text=f"<b>❌ Название комапании уже занято!</b>\
+                    \n\n<i>Компания с названием</i> <u>{company_name}</u> <i>уже существует. Пожалуйста, введите иное:</i>"
+                )
+                return
+            else:
+                data = await state.get_data()        
+                data['company_name'] = company_name
+                await state.update_data(data)
+                
+                await message.answer(
+                    text=f"<b>{company_name}?</b> — звучит отлично!\
+                    \n\n<b>Нам потребуется дополнительный контакт для связи продавца с Вами.</b>\
+                    \n\n<i>Предоставьте информацию о любом способе связи, исключая Telegram:</i>"
+                )
+                await state.set_state(AddSeller.contact)
+        else:
+            await message.answer(text=response_server_error)
 
 
 # --- Стадия 2. Ввод способа для связи ---
@@ -142,7 +136,7 @@ async def get_company_name(message: Message, state: FSMContext):
     else:
         data = await state.get_data()
 
-        # --- Проверка на существование стадии ---
+        # --- Проверка на существование стадии заполнения ---
         if not data:
             await message.answer(text=no_state)
             return
@@ -181,39 +175,61 @@ async def accept_seller_account_creating_btn(callback: CallbackQuery, state: FSM
         await callback.message.answer(text=no_state)
         return
     
-    # --- Проверка на существование записи и при отсутствии insert ---
+    company_name = data.get('company_name', '')
+    contact = data.get('contact', '')
+    await state.clear()
+
+    # --- Проверка на существование комапании с таким же названием ---
     async with httpx.AsyncClient() as client:
-        response = await client.post(callback.bot.config["SETTINGS"]["backend_url"] + 'create_seller', json={
-            'user_id': callback.from_user.id,
-            'company_name': data.get('company_name', ''),
-            'contact': data.get('contact', ''),
-        })
-        
-        if response.status_code == 200:
-            await callback.message.edit_text(
-                text=f"Добро пожаловать, @{callback.from_user.username}!\n\nВы — продавец.\n\n<i>Не затягивайте, выставляйте свои потрясающие товары! 💖</i>",
-                reply_markup=seller_panel_btns().as_markup()
-            )
+        check_duplicate_company_name = await client.get(
+            f"{callback.bot.config['SETTINGS']['backend_url']}check_duplicate_company_name?company_name={company_name}"
+        )
+            
+    if check_duplicate_company_name.status_code == 200:
+        if check_duplicate_company_name.json():
+            await callback.message.delete()
             await callback.message.answer(
-                text="✅ Ваши даннные успешно сохранены и находятся в полной безопасности!",
+                text=f"<b>❌ Название комапании уже занято!</b>\
+                \n\n<i>Компания с названием <u>{company_name}</u> уже существует...</i>",
                 reply_markup=ReplyKeyboardRemove()
             )
+            return
         else:
+            # --- Создание аккаунта ---
+            async with httpx.AsyncClient() as client:
+                response = await client.post(callback.bot.config["SETTINGS"]["backend_url"] + 'create_seller', json={
+                    'user_id': callback.from_user.id,
+                    'company_name': company_name,
+                    'contact': contact,
+                })
+
+        if response.status_code == 200:
             await callback.message.edit_text(
-                text="Что-то пошло не так...",
-                reply_markup=None
+                text="Ваши даннные сохранены и находятся в полной безопасности!\n\n<i>Мы обо всём позаботимся 😉</i>",
+                reply_markup=ReplyKeyboardRemove
             )
+            await callback.message.answer(
+                text=f"Добро пожаловать, @{callback.from_user.username}!\n\n<b>Вы — продавец.</b>\n\n<i>Не затягивайте, выставляйте свои потрясающие товары! 💖</i>",
+                reply_markup=seller_panel_btns().as_markup()
+            )
+        else:
+            await callback.message.delete()
             await callback.message.answer(
                 text=response_server_error,
                 reply_markup=ReplyKeyboardRemove()
             )
-        await state.clear()
+    else:
+        await callback.message.delete()
+        await callback.message.answer(
+            text=response_server_error,
+            reply_markup=ReplyKeyboardRemove()
+        )
       
 
 # --- Обработчик кнопоки рестарта регистрации продавца ---
 @router.callback_query(F.data == "refresh_seller_account_creating")
-async def accept_seller_account_creating_btn(callback: CallbackQuery, state: FSMContext):
-    # --- Проверка на существование записи ---
+async def refresh_seller_account_creating_btn(callback: CallbackQuery, state: FSMContext):
+    # --- Проверка на существование аккаунта продавца ---
     async with httpx.AsyncClient() as client:
         response = await client.get(
             f"{callback.bot.config['SETTINGS']['backend_url']}get_seller?user_id={callback.from_user.id}"

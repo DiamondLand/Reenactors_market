@@ -56,6 +56,5 @@ async def cancel_func(message: Message, state: FSMContext):
             text=no_state_but_button_is,
             reply_markup=ReplyKeyboardRemove()
         )
-        return
-    
+        return False
     await state.clear()

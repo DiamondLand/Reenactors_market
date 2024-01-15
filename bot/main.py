@@ -4,8 +4,9 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from loguru import logger
-from handlers.seller import products_on_moderation
 
+from events import events
+from handlers.seller import products_on_moderation
 from handlers.register import register_panel
 from handlers.seller import add_product
 from handlers.support import chat_with_support, info_panel
@@ -25,6 +26,7 @@ async def main():
     # --- Подключение модулей ---
     logger.info("Loading modules...")
     dp.include_routers(
+        events.router,
         register_panel.router,
         product_moderation.router,
         add_product.router,

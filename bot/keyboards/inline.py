@@ -25,6 +25,10 @@ def shop_open_btn() -> InlineKeyboardBuilder:
         InlineKeyboardButton(
             text="В магазин 🛍️",
             callback_data="shop_open"
+        ),
+        InlineKeyboardButton(
+            text="Назад",
+            callback_data="back_to_main_panel"
         )
     )
     return builder
@@ -57,6 +61,10 @@ def admin_panel_btns() -> InlineKeyboardBuilder:
         InlineKeyboardButton(
             text="Назначить оператора поддержки 🎉",
             callback_data="new_support"
+        ),
+        InlineKeyboardButton(
+            text="Назад",
+            callback_data="back_to_main_panel"
         )
     )
     builder.adjust(2, 1)
@@ -74,6 +82,10 @@ def support_panel_btns() -> InlineKeyboardBuilder:
         InlineKeyboardButton(
             text="Ответить на запросы 💌",
             callback_data="chat_with_buyer"
+        ),
+        InlineKeyboardButton(
+            text="Назад",
+            callback_data="back_to_main_panel"
         )
     )
     builder.adjust(1, 1)
@@ -95,13 +107,17 @@ def seller_panel_btns() -> InlineKeyboardBuilder:
         InlineKeyboardButton(
             text="Товары на модерации ⚙️",
             callback_data="cheak_product_on_moderation"
+        ),
+        InlineKeyboardButton(
+            text="Назад",
+            callback_data="back_to_main_panel"
         )
     )
     builder.adjust(1, 1)
     return builder
 
 
-# --- Просмотрт товаров на модерации---
+# --- Просмотр товаров на модерации---
 def seller_products_on_moderation_btns() -> InlineKeyboardBuilder:
     builder = InlineKeyboardBuilder()
     builder.add(
@@ -116,6 +132,10 @@ def seller_products_on_moderation_btns() -> InlineKeyboardBuilder:
         InlineKeyboardButton(
             text="Добавить товар ➕",
             callback_data="add_product_to_moderation"
+        ),
+        InlineKeyboardButton(
+            text="Вернуться в панель продавца",
+            callback_data="i_am_seller"
         )
     )
     builder.adjust(2, 1)
